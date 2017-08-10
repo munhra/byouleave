@@ -11,6 +11,9 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +24,8 @@ import android.widget.TextView;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.media.RingtoneManager.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,12 +80,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
                 Log.v("BYouLeave","Scan BLE callback ! "+device.getName());
-                //if ("HMSoft".equals(device.getName())) {
+                if ("TESTNAME".equals(device.getName())) {
                     Log.v("BYouLeave","FOUND HMSOFT ! "+device.getName());
                     btAdapter.stopLeScan(lesScanCallBack);
                     createConnectionCallBack();
                     bluetoothGatt = device.connectGatt(context,false,btleGattCallback);
-                //}
+                }
             }
         };
     }
@@ -92,6 +97,14 @@ public class MainActivity extends AppCompatActivity {
                 //super.onConnectionStateChange(gatt, status, newState);
                 Log.v("BYouLeave","onConnectionStateChange");
                 bluetoothGatt.discoverServices();
+                final TextView statusText = (TextView) findViewById(R.id.doorStatusText);
+                statusText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        statusText.setText("BLE Connected");
+                    }
+                });
+
             }
 
             @Override
@@ -147,8 +160,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         statusText.setText(bleText);
+                        playNotificationSound();
                     }
                 });
+
 
             }
 
@@ -185,7 +200,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playNotificationSound() {
-
+        Uri notification = getDefaultUri(TYPE_NOTIFICATION);
+        Ringtone r = getRingtone(getApplicationContext(), notification);
+        r.play();
     }
 
     public static String bytesToString2(byte[] bytes) {
