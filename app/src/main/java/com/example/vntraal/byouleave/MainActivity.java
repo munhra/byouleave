@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         }else{
             Log.v("BYouLeave","Adapter ready enable button");
             createScanCallBack();
-            //btAdapter.startLeScan(lesScanCallBack);
+            btAdapter.startLeScan(lesScanCallBack);
             defineButtonClick();
         }
     }
@@ -140,7 +141,14 @@ public class MainActivity extends AppCompatActivity {
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
                 Log.v("BYouLeave","onCharacteristicChanged "+bytesToString2(characteristic.getValue()));
-
+                final String bleText = bytesToString2(characteristic.getValue());
+                final TextView statusText = (TextView) findViewById(R.id.doorStatusText);
+                statusText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        statusText.setText(bleText);
+                    }
+                });
 
             }
 
@@ -174,7 +182,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.v("BYouLeave","onMtuChanged");
             }
         };
+    }
 
+    public void playNotificationSound() {
 
     }
 
