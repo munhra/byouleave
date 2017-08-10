@@ -21,6 +21,7 @@ http://ticketmastermobilestudio.com/blog/android-bluetooth-low-energy-tutorial
 http://www.instructables.com/id/Control-RGB-lights-from-Android-with-Arduino-Bluet/
 
 ##### More about BLE
+Very nice spec with that show the default firmware of hm-10 services and categories.
 http://www.martyncurrey.com/hm-10-bluetooth-4ble-modules/
 
 
