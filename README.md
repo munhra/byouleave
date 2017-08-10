@@ -24,4 +24,5 @@ http://www.instructables.com/id/Control-RGB-lights-from-Android-with-Arduino-Blu
 Very nice spec that show the default firmware of hm-10 services and categories.
 http://www.martyncurrey.com/hm-10-bluetooth-4ble-modules/
 
-
+##### Android Google Calendar Quickstart
+https://developers.google.com/google-apps/calendar/quickstart/android
