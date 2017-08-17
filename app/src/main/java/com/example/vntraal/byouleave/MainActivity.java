@@ -1,6 +1,10 @@
 package com.example.vntraal.byouleave;
 
-import android.app.Application;
+import android.Manifest;
+import android.accounts.AccountManager;
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -11,9 +15,17 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.Ringtone;
-import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,7 +35,9 @@ import android.widget.TextView;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
 
 import static android.media.RingtoneManager.*;
 
@@ -31,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String BLE_SERVICE = "0000ffe0-0000-1000-8000-00805f9b34fb";
     private static final String BLE_CHARACTERISTIC = "0000ffe1-0000-1000-8000-00805f9b34fb";
+    private static Context mContext;
+    private static Activity mActivity;
+    private static SharedPreferences mSettings;
+    private static ConnectivityManager mConnMgr;
     private BluetoothManager btManager;
     private final static int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter.LeScanCallback lesScanCallBack;
@@ -38,25 +56,66 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothGattCallback btleGattCallback;
     private BluetoothGatt bluetoothGatt;
 
+    private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
+    private CalendarManager calendarManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getApplicationContext();
+        mActivity = this;
+        mSettings = getPreferences(Context.MODE_PRIVATE);
+        mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        calendarManager = CalendarManager.getInstance();
         setContentView(R.layout.activity_main);
-        btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-        checkBLEAvaiability();
+        checkPermitions();
     }
 
-    private void defineButtonClick() {
-        final Button button = (Button) findViewById(R.id.scan_button);
-        button.setOnClickListener(new View.OnClickListener(){
 
-            public void onClick(View v) {
-                // Code here executes on main thread after user presses button
-                Log.v("BYouLeave","Start Scan...");
-                btAdapter.startLeScan(lesScanCallBack);
-            }
+    public static Context getContext() {
+        return mContext;
+    }
 
-        });
+    public static  Activity getActivity() {
+        return mActivity;
+    }
+
+    public static SharedPreferences getSettings() {
+        return mSettings;
+    }
+
+    public static ConnectivityManager getConnMgr() {
+        return mConnMgr;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        calendarManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    private void checkPermitions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
+        } else {
+            btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+            checkBLEAvaiability();
+            calendarManager.startRepeatingTask();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_ACCESS_COARSE_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+                    checkBLEAvaiability();
+                    calendarManager.startRepeatingTask();
+                }
+
+                break;
+        }
     }
 
     private void checkBLEAvaiability() {
@@ -71,6 +130,19 @@ public class MainActivity extends AppCompatActivity {
             btAdapter.startLeScan(lesScanCallBack);
             defineButtonClick();
         }
+    }
+
+    private void defineButtonClick() {
+        final Button button = (Button) findViewById(R.id.scan_button);
+        button.setOnClickListener(new View.OnClickListener(){
+
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                Log.v("BYouLeave","Start Scan...");
+                btAdapter.startLeScan(lesScanCallBack);
+            }
+
+        });
     }
 
     private void createScanCallBack() {
@@ -160,6 +232,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         statusText.setText(bleText);
+
+                        if (bleText.equals("Switch OPEN")) {
+                            Log.v("asdasdasdasd", "asdasdadsasd");
+                        }
+
+                        List<String> calendarResult = calendarManager.getCalendarRetults();
+                        statusText.append("\n");
+                        for(String item : calendarResult) {
+                            statusText.append(item);
+                            statusText.append("\n");
+                        }
                         playNotificationSound();
                     }
                 });
