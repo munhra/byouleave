@@ -1,31 +1,23 @@
 package com.example.vntraal.byouleave;
 
 import android.Manifest;
-import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,18 +27,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-
-import static android.media.RingtoneManager.*;
+import static android.media.RingtoneManager.TYPE_NOTIFICATION;
+import static android.media.RingtoneManager.getDefaultUri;
+import static android.media.RingtoneManager.getRingtone;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String BLE_SERVICE = "0000ffe0-0000-1000-8000-00805f9b34fb";
-    private static final String BLE_CHARACTERISTIC = "0000ffe1-0000-1000-8000-00805f9b34fb";
     private static Context mContext;
     private static Activity mActivity;
     private static SharedPreferences mSettings;
@@ -63,6 +52,47 @@ public class MainActivity extends AppCompatActivity {
 
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
     private CalendarManager calendarManager;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            TextView statusBLE = (TextView) findViewById(R.id.doorStatusText);
+            TextView contentOfCalendar = (TextView) findViewById(R.id.itensForTest);
+
+
+            String actionName = intent.getStringExtra("Status BLE").substring(0,9);
+            String actionStatus = intent.getStringExtra("Status BLE").substring(11);
+            Log.e("BR",actionStatus);
+
+            List<String> calendarResult = calendarManager.getCalendarRetults();
+            calendarManager.startRepeatingTask();
+
+            switch (actionName) {
+                case "STATUSBLE":
+                    statusBLE.setText("");
+                    statusBLE.setText("Bluetooth Connected");
+
+                    playNotificationSound();
+                    break;
+                case "OPENEDDOO":
+                    playNotificationSound();
+
+                    statusBLE.setText(actionStatus);
+
+                    contentOfCalendar.setText("");
+
+                    for(String item : calendarResult) {
+                        contentOfCalendar.append(item);
+                        contentOfCalendar.append("\n");
+                    }
+
+                    break;
+            }
+
+            //Log.e("Resultado", "" + intent.getStringExtra("Status BLE"));
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +113,9 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setAdapter(mAdapter);
         checkPermitions();
+        startService(new Intent(getBaseContext(), BluetoothConnection.class));
 
+        registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
     }
 
 
@@ -114,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-            checkBLEAvaiability();
-            calendarManager.startRepeatingTask();
+            //checkBLEAvaiability();
+            //calendarManager.startRepeatingTask();
         }
     }
 
@@ -125,25 +157,11 @@ public class MainActivity extends AppCompatActivity {
             case PERMISSION_ACCESS_COARSE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-                    checkBLEAvaiability();
-                    calendarManager.startRepeatingTask();
+                    //checkBLEAvaiability();
+                    //calendarManager.startRepeatingTask();
                 }
 
                 break;
-        }
-    }
-
-    private void checkBLEAvaiability() {
-        btAdapter = btManager.getAdapter();
-        if (btAdapter != null && !btAdapter.isEnabled()) {
-            Log.v("BYouLeave","Adapter not ready");
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
-        }else{
-            Log.v("BYouLeave","Adapter ready enable button");
-            createScanCallBack();
-            btAdapter.startLeScan(lesScanCallBack);
-            defineButtonClick();
         }
     }
 
@@ -160,164 +178,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void createScanCallBack() {
-        final Context context = this;
-        lesScanCallBack = new BluetoothAdapter.LeScanCallback() {
-
-            @Override
-            public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-                Log.v("BYouLeave","Scan BLE callback ! "+device.getName());
-                if ("TESTNAME".equals(device.getName())) {
-                    Log.v("BYouLeave","FOUND HMSOFT ! "+device.getName());
-                    btAdapter.stopLeScan(lesScanCallBack);
-                    createConnectionCallBack();
-                    bluetoothGatt = device.connectGatt(context,false,btleGattCallback);
-                }
-            }
-        };
-    }
-
-    private void createConnectionCallBack() {
-        btleGattCallback = new BluetoothGattCallback() {
-            @Override
-            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                //super.onConnectionStateChange(gatt, status, newState);
-                Log.v("BYouLeave","onConnectionStateChange");
-                bluetoothGatt.discoverServices();
-                final TextView statusText = (TextView) findViewById(R.id.doorStatusText);
-                statusText.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        statusText.setText("BLE Connected");
-                    }
-                });
-
-            }
-
-            @Override
-            public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                super.onServicesDiscovered(gatt, status);
-                Log.v("BYouLeave","onServicesDiscovered");
-                List<BluetoothGattService> services = gatt.getServices();
-
-                for (BluetoothGattService service:services) {
-                    Log.v("BYouLeave", "Service " + service.getUuid());
-                    if (BLE_SERVICE.equals(service.getUuid().toString())) {
-                        List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
-                        for (BluetoothGattCharacteristic characteristic : characteristics) {
-                            if (BLE_CHARACTERISTIC.equals(characteristic.getUuid().toString())) {
-                                Log.v("BYouLeave", "Found the Characteristic" + characteristic.getUuid());
-                                for (BluetoothGattDescriptor descriptor : characteristic.getDescriptors()) {
-                                    Log.v("BYouLeave", "Descriptors " + descriptor.getUuid());
-                                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-                                    bluetoothGatt.writeDescriptor(descriptor);
-
-                                }
-
-                                bluetoothGatt.setCharacteristicNotification(characteristic,true);
-
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                super.onCharacteristicRead(gatt, characteristic, status);
-                Log.v("BYouLeave","onCharacteristicRead");
-            }
-
-            @Override
-            public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                super.onCharacteristicWrite(gatt, characteristic, status);
-                Log.v("BYouLeave","onCharacteristicWrite");
-            }
-
-            @Override
-            public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                super.onCharacteristicChanged(gatt, characteristic);
-                Log.v("BYouLeave","onCharacteristicChanged "+bytesToString2(characteristic.getValue()));
-                final String bleText = bytesToString2(characteristic.getValue());
-                final TextView statusText = (TextView) findViewById(R.id.doorStatusText);
-                statusText.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        statusText.setText(bleText);
-
-                        if (bleText.equals("Switch OPEN")) {
-                            Log.v("asdasdasdasd", "asdasdadsasd");
-                        }
-
-                        List<String> calendarResult = calendarManager.getCalendarRetults();
-                        statusText.append("\n");
-                        for(String item : calendarResult) {
-                            statusText.append(item);
-                            statusText.append("\n");
-                        }
-                        playNotificationSound();
-                    }
-                });
-
-
-            }
-
-            @Override
-            public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-                super.onDescriptorRead(gatt, descriptor, status);
-                Log.v("BYouLeave","onDescriptorRead");
-            }
-
-            @Override
-            public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-                super.onDescriptorWrite(gatt, descriptor, status);
-                Log.v("BYouLeave","onDescriptorWrite");
-            }
-
-            @Override
-            public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
-                super.onReliableWriteCompleted(gatt, status);
-                Log.v("BYouLeave","onReliableWriteCompleted");
-            }
-
-            @Override
-            public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-                super.onReadRemoteRssi(gatt, rssi, status);
-                Log.v("BYouLeave","onReadRemoteRssi");
-            }
-
-            @Override
-            public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
-                super.onMtuChanged(gatt, mtu, status);
-                Log.v("BYouLeave","onMtuChanged");
-            }
-        };
-    }
-
     public void playNotificationSound() {
         Uri notification = getDefaultUri(TYPE_NOTIFICATION);
         Ringtone r = getRingtone(getApplicationContext(), notification);
         r.play();
-    }
-
-    public static String bytesToString2(byte[] bytes) {
-        String text = "";
-        try {
-            text =  new String(bytes, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return text;
-    }
-
-    public static String bytesToString(byte[] bytes){
-        StringBuilder stringBuilder = new StringBuilder(
-                bytes.length);
-        for (byte byteChar : bytes)
-            stringBuilder.append(String.format("%02X ", byteChar));
-        return stringBuilder.toString();
     }
 }

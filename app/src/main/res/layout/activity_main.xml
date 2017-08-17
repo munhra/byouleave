@@ -22,6 +22,15 @@
             android:gravity="center"
             android:text="Connecting Blue Tooth ..."
             android:textSize="25dp" />
+
+        <TextView
+            android:id="@+id/itensForTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Lorem Ipsum Dolor"
+            android:textSize="15dp" />
+
     </LinearLayout>
 
     <LinearLayout
