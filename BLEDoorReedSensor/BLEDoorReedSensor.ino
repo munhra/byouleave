@@ -36,9 +36,9 @@ void setup()
   pinMode(REED_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
   //digitalRead(REED_PIN)
-  setupWifi();
-  sendRegister();
-  setupFOTA();
+  //setupWifi();
+  //sendRegister();
+  //setupFOTA();
 }
 
 void loop()
@@ -63,7 +63,7 @@ void loop()
       BTSerial.write("Close");
       sendClosedBLEInfo = false;
       sendOpenedBLEInfo = true;
-      sendDetectionPost("0");
+      //sendDetectionPost("0");
     }
   }
   else
@@ -75,7 +75,7 @@ void loop()
       BTSerial.write("Open");
       sendClosedBLEInfo = true;
       sendOpenedBLEInfo = false;   
-      sendDetectionPost("1"); 
+      //sendDetectionPost("1"); 
     }
    
   }
@@ -90,7 +90,7 @@ void setupWifi() {
   
   WiFi.begin(ssid, password);
   
-  while ((WiFi.status() != WL_CONNECTED) && (!stopWIFISearch)) {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
@@ -143,11 +143,11 @@ void sendRegister()
   WiFiClient client;
   const int httpPort = 3000;
   
-  
+  /*
   if (!client.connect(host, httpPort)) {
     Serial.println("connection failed");
     setupWifi();
-  }
+  }*/
 
   String url = "/api/sensor/register?roomName="+roomName+"&mac="+getMacAddress()+"&ip="+ipToString(WiFi.localIP());
 
