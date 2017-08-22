@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.vntraal.byouleave.ItemOfCalendar">
+
+    <View
+        android:id="@+id/contColorBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/div_center"
+        android:background="@color/BLUE"></View>
+    
+    <TextView
+        style="@style/Text.Primary"
+        android:id="@+id/textViewDataAndTimeHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="2:43AM 22/08/2017"
+        android:layout_above="@id/div_center"/>
+    
+    <View
+        android:id="@+id/div_center"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_centerVertical="true"></View>
+    
+    <TextView
+        style="@style/Text.Secondary"
+        android:id="@+id/textViewMessageBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/div_center"
+        tools:text="Lorem Ipsum Dolor Sir Amet Lorem Ipsum Dolor Sir Amet Lorem Ipsum Dolor Sir Amet Lorem Ipsum Dolor Sir Amet Lorem Ipsum Dolor Sir Amet "
+
+</RelativeLayout>
