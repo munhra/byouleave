@@ -62,10 +62,19 @@ public class MainActivity extends AppCompatActivity {
 
             String actionName = intent.getStringExtra("Status BLE").substring(0,9);
             String actionStatus = intent.getStringExtra("Status BLE").substring(11);
-            Log.e("BR",actionStatus);
+            Log.e("Action status",actionStatus);
+            Log.v("Acion name",actionName);
 
             List<String> calendarResult = calendarManager.getCalendarRetults();
             calendarManager.startRepeatingTask();
+
+            //remove it when fixed mock data
+            if (calendarResult.isEmpty()) {
+                calendarResult.add("Levar a vó na musculação");
+                calendarResult.add("Comprar gelo");
+                calendarResult.add("Pegar o cachorro no pet shop");
+                calendarResult.add("Pagar o Celso");
+            }
 
             switch (actionName) {
                 case "STATUSBLE":
@@ -74,17 +83,26 @@ public class MainActivity extends AppCompatActivity {
 
                     playNotificationSound();
                     break;
+                case "CLOSENEDO":
+                    playNotificationSound();
+                    statusBLE.setText("");
+                    break;
+
                 case "OPENEDDOO":
                     playNotificationSound();
 
-                    statusBLE.setText(actionStatus);
+                    //statusBLE.setText(actionStatus);
 
-                    contentOfCalendar.setText("");
+                    statusBLE.setText("");
 
                     for(String item : calendarResult) {
-                        contentOfCalendar.append(item);
-                        contentOfCalendar.append("\n");
+                        statusBLE.append(item);
+                        statusBLE.append("\n");
+                        Log.v("MainActivity","");
                     }
+
+                    //statusBLE.setText(contentOfCalendar);
+
 
                     break;
             }

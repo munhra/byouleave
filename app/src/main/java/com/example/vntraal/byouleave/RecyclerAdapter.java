@@ -1,6 +1,7 @@
 package com.example.vntraal.byouleave;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         try {
             String event = mCalendarData.get(position);
+            Log.v("RecyclerAdapter java",event);
             holder.mEvent.setText(event);
         } catch (Exception e) {
             //Error

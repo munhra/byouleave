@@ -184,7 +184,8 @@ public class BluetoothConnection extends Service {
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
-                Log.v("BYouLeave","onCharacteristicChanged "+bytesToString2(characteristic.getValue()));
+                String bleMessage = bytesToString2(characteristic.getValue());
+                Log.v("BYouLeave","onCharacteristicChanged "+bleMessage);
                 final String bleText = bytesToString2(characteristic.getValue());
                 final TextView statusText = (TextView) layout.findViewById(R.id.doorStatusText);
                 statusText.post(new Runnable() {
@@ -194,7 +195,13 @@ public class BluetoothConnection extends Service {
                     }
                 });
                 Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
-                atualizarStatusBLE.putExtra("Status BLE", "OPENEDDOO: " + bytesToString2(characteristic.getValue()));
+
+                if ("Switch OPEN\r\n".equals(bleMessage)) {
+                    atualizarStatusBLE.putExtra("Status BLE", "OPENEDDOO: " + bytesToString2(characteristic.getValue()));
+                }else{
+                    atualizarStatusBLE.putExtra("Status BLE", "CLOSENEDOO: " + bytesToString2(characteristic.getValue()));
+                }
+
                 sendBroadcast(atualizarStatusBLE);
 
             }
