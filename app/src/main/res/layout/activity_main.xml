@@ -63,6 +63,13 @@
             android:text="Scan" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/switchWifi"
+        android:text="Wifi Mode"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>
 
 

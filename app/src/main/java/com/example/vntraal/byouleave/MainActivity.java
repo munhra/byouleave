@@ -53,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
     private CalendarManager calendarManager;
 
+
+    // Button to Wifi Connection
+    Button switchWifi;
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -116,6 +120,16 @@ public class MainActivity extends AppCompatActivity {
         startService(new Intent(getBaseContext(), BluetoothConnection.class));
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
+
+        // Wifi Mode
+        switchWifi = (Button) findViewById(R.id.switchWifi);
+        switchWifi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent(MainActivity.this, WifiConnection.class);
+                startActivity(myIntent);
+            }
+        });
     }
 
 
