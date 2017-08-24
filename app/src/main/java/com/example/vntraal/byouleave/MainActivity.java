@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -27,8 +28,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.media.RingtoneManager.TYPE_NOTIFICATION;
 import static android.media.RingtoneManager.getDefaultUri;
@@ -47,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothGattCallback btleGattCallback;
     private BluetoothGatt bluetoothGatt;
     private RecyclerView mRecyclerView;
-    private RecyclerAdapter mAdapter;
+    private RecyclerView.Adapter meuAdapter = new EventAdapter();
     private RecyclerView.LayoutManager mLayoutManager;
 
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
@@ -64,7 +68,10 @@ public class MainActivity extends AppCompatActivity {
             String actionStatus = intent.getStringExtra("Status BLE").substring(11);
             Log.e("BR",actionStatus);
 
-            List<String> calendarResult = calendarManager.getCalendarRetults();
+            List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
+
+            calendarManager.getCalendarRetults();
+
             calendarManager.startRepeatingTask();
 
             switch (actionName) {
@@ -79,17 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
                     statusBLE.setText(actionStatus);
 
-                    contentOfCalendar.setText("");
-
-                    for(String item : calendarResult) {
-                        contentOfCalendar.append(item);
-                        contentOfCalendar.append("\n");
-                    }
-
                     break;
             }
-
-            //Log.e("Resultado", "" + intent.getStringExtra("Status BLE"));
         }
     };
 
@@ -102,21 +100,46 @@ public class MainActivity extends AppCompatActivity {
         mSettings = getPreferences(Context.MODE_PRIVATE);
         mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         calendarManager = CalendarManager.getInstance();
-
         setContentView(R.layout.activity_main);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new RecyclerAdapter();
+        mRecyclerView.setAdapter(meuAdapter);
 
-        mRecyclerView.setAdapter(mAdapter);
+
+
         checkPermitions();
         startService(new Intent(getBaseContext(), BluetoothConnection.class));
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
     }
+
+
+
+    public void callAsynchronousTask() {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsynchronousTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                            ((EventAdapter) meuAdapter).setmData(lista);
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(doAsynchronousTask, 0, 5000); //execute in every 50000 ms
+    };
 
 
     public static Context getContext() {
@@ -146,6 +169,8 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+            calendarManager.startRepeatingTask();
+            callAsynchronousTask();
             //checkBLEAvaiability();
             //calendarManager.startRepeatingTask();
         }
