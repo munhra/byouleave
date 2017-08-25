@@ -1,6 +1,10 @@
 package com.example.vntraal.byouleave;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -70,9 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
             List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
 
-            calendarManager.getCalendarRetults();
+            //calendarManager.getCalendarRetults();
 
-            calendarManager.startRepeatingTask();
+            //calendarManager.startRepeatingTask();
 
             switch (actionName) {
                 case "STATUSBLE":
@@ -112,11 +116,32 @@ public class MainActivity extends AppCompatActivity {
 
 
         checkPermitions();
-        startService(new Intent(getBaseContext(), BluetoothConnection.class));
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
+        //getWindow().getDecorView().getRootView()
+        //setAlphaAnimation(getWindow().getDecorView().getRootView());
+    Log.e("x","xxxxxxxxxxxxxx");
     }
 
+    public static void setAlphaAnimation(View v) {
+        ObjectAnimator fadeOut = ObjectAnimator.ofFloat(v, "alpha",  1f, .3f);
+        fadeOut.setDuration(2000);
+        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(v, "alpha", .3f, 1f);
+        fadeIn.setDuration(2000);
+
+        final AnimatorSet mAnimationSet = new AnimatorSet();
+
+        mAnimationSet.play(fadeIn).after(fadeOut);
+
+        mAnimationSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                mAnimationSet.start();
+            }
+        });
+        mAnimationSet.start();
+    }
 
 
     public void callAsynchronousTask() {
@@ -126,6 +151,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void run() {
+
+                calendarManager.startTask();
+
                 handler.post(new Runnable() {
                     public void run() {
                         try {
@@ -160,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         calendarManager.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -169,8 +198,9 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-            calendarManager.startRepeatingTask();
+            calendarManager.startTask();
             callAsynchronousTask();
+            startService(new Intent(getBaseContext(), BluetoothConnection.class));
             //checkBLEAvaiability();
             //calendarManager.startRepeatingTask();
         }
@@ -178,12 +208,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSION_ACCESS_COARSE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-                    //checkBLEAvaiability();
-                    //calendarManager.startRepeatingTask();
+                    calendarManager.startTask();
+                    callAsynchronousTask();
+                    startService(new Intent(getBaseContext(), BluetoothConnection.class));
                 }
 
                 break;
