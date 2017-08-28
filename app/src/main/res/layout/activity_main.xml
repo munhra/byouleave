@@ -16,7 +16,7 @@
         android:gravity="center">
 
         <TextView
-            android:id="@+id/doorStatusText"
+            android:id="@+id/BluetoothStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -24,7 +24,7 @@
             android:textSize="25dp" />
 
         <TextView
-            android:id="@+id/itensForTest"
+            android:id="@+id/DoorStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"

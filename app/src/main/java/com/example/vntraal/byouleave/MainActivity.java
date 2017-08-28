@@ -6,11 +6,15 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.app.KeyguardManager;
+import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -20,6 +24,7 @@ import android.media.Ringtone;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -29,8 +34,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter meuAdapter = new EventAdapter();
     private RecyclerView.LayoutManager mLayoutManager;
+    private DevicePolicyManager devicePolicyManager;
+    private ComponentName componentName = null;
 
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
     private CalendarManager calendarManager;
@@ -64,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            TextView statusBLE = (TextView) findViewById(R.id.doorStatusText);
-            TextView contentOfCalendar = (TextView) findViewById(R.id.itensForTest);
+            TextView statusBLE = (TextView) findViewById(R.id.BluetoothStatus);
+            TextView doorAction = (TextView) findViewById(R.id.DoorStatus);
 
 
             String actionName = intent.getStringExtra("Status BLE").substring(0,9);
@@ -74,13 +84,12 @@ public class MainActivity extends AppCompatActivity {
 
             List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
 
-            //calendarManager.getCalendarRetults();
-
-            //calendarManager.startRepeatingTask();
-
             switch (actionName) {
+                case "DOORSTATU":
+                    doorAction.setText(actionStatus);
+
+                    break;
                 case "STATUSBLE":
-                    statusBLE.setText("");
                     statusBLE.setText("Bluetooth Connected");
 
                     playNotificationSound();
@@ -88,9 +97,26 @@ public class MainActivity extends AppCompatActivity {
                 case "OPENEDDOO":
                     playNotificationSound();
 
-                    statusBLE.setText(actionStatus);
+
+                    doorAction.setText(actionStatus);
+                    switch (actionStatus.trim()){
+                        case "Switch CLOSED":
+                            ((EventAdapter) meuAdapter).resetData();
+                            Log.e("Action", "Door has been closed");
+                            fadeOut();
+                            break;
+                        case "Switch OPEN":
+                            ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                            ((EventAdapter) meuAdapter).setmData(lista);
+                            Log.e("Action", "Door has been opened");
+                            Unlock();
+                            break;
+                        default: statusBLE.setText("Problems with the Message"); doorAction.setText("Problems with the Message"); break;
+                    }
 
                     break;
+                default: statusBLE.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
+
             }
         }
     };
@@ -105,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
         mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         calendarManager = CalendarManager.getInstance();
         setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
@@ -113,34 +141,11 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setAdapter(meuAdapter);
 
-
-
         checkPermitions();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
-        //getWindow().getDecorView().getRootView()
-        //setAlphaAnimation(getWindow().getDecorView().getRootView());
-    Log.e("x","xxxxxxxxxxxxxx");
-    }
 
-    public static void setAlphaAnimation(View v) {
-        ObjectAnimator fadeOut = ObjectAnimator.ofFloat(v, "alpha",  1f, .3f);
-        fadeOut.setDuration(2000);
-        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(v, "alpha", .3f, 1f);
-        fadeIn.setDuration(2000);
 
-        final AnimatorSet mAnimationSet = new AnimatorSet();
-
-        mAnimationSet.play(fadeIn).after(fadeOut);
-
-        mAnimationSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                mAnimationSet.start();
-            }
-        });
-        mAnimationSet.start();
     }
 
 
@@ -152,13 +157,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                calendarManager.startTask();
-
                 handler.post(new Runnable() {
                     public void run() {
                         try {
                             ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
                             ((EventAdapter) meuAdapter).setmData(lista);
+                            Log.e("Assync", "Assync updated RecyclerView Adapter Data");
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
                         }
@@ -199,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
             calendarManager.startTask();
-            callAsynchronousTask();
+            //callAsynchronousTask();
             startService(new Intent(getBaseContext(), BluetoothConnection.class));
             //checkBLEAvaiability();
             //calendarManager.startRepeatingTask();
@@ -214,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
                     calendarManager.startTask();
-                    callAsynchronousTask();
+                    //callAsynchronousTask();
                     startService(new Intent(getBaseContext(), BluetoothConnection.class));
                 }
 
@@ -229,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
                 Log.v("BYouLeave","Start Scan...");
-                btAdapter.startLeScan(lesScanCallBack);
+                Log.e("BT","Button was Clicked!");
             }
 
         });
@@ -239,5 +243,24 @@ public class MainActivity extends AppCompatActivity {
         Uri notification = getDefaultUri(TYPE_NOTIFICATION);
         Ringtone r = getRingtone(getApplicationContext(), notification);
         r.play();
+    }
+
+    public void fadeOut(){
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.screenBrightness = 0;
+        getWindow().setAttributes(params);
+    }
+
+    public void Unlock(){
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.screenBrightness = 1.0f;
+        getWindow().setAttributes(params);
+
+        KeyguardManager.KeyguardLock lock = ((KeyguardManager) getSystemService(Activity.KEYGUARD_SERVICE)).newKeyguardLock(KEYGUARD_SERVICE);
+        PowerManager powerManager = ((PowerManager) getSystemService(Context.POWER_SERVICE));
+        PowerManager.WakeLock wake = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
+
+        lock.disableKeyguard();
+        wake.acquire();
     }
 }

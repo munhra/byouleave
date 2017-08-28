@@ -37,6 +37,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     }
 
+    public void resetData(){
+        mData = new ArrayList<String>();
+        notifyDataSetChanged();
+    }
+
     @Override
     public EventAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.event_list_item, parent, false);
