@@ -3,7 +3,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:background="#E06A80">
 
     <TextView
         android:id="@+id/event"
@@ -11,7 +12,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="Event"
-        android:textSize="25dp" />
+        android:textSize="25dp"
+        android:textColor="#FFFFFF"/>
 
 
 </LinearLayout>

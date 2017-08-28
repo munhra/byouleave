@@ -1,41 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="top"
     android:padding="20dp"
     android:layout_marginTop="0dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#E06A80">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="0dp"
         android:gravity="center">
 
-        <TextView
-            android:id="@+id/doorStatusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Connecting Blue Tooth ..."
-            android:textSize="25dp" />
+        <Button
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:background="@drawable/menu_placeholder" />
 
-        <TextView
-            android:id="@+id/itensForTest"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Lorem Ipsum Dolor"
-            android:textSize="15dp" />
+            android:orientation="vertical"
+            android:layout_marginTop="0dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/itensForTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Before You Leave"
+                android:textSize="16dp"
+                android:textColor="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/doorStatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Connecting Blue Tooth ..."
+                android:textSize="12dp"
+                android:textColor="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <Button
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:background="@drawable/config_placeholder" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:background="@drawable/shape"
+        android:elevation="10dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:gravity="left"
+            android:layout_weight="0.5">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Thursday"
+                android:textSize="24dp"
+                android:textStyle="bold"
+                android:textColor="#E06A80"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="August 24"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:textColor="#E06A80"/>
+
+        </LinearLayout>
+
+        <TextClock
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:paddingRight="20dp"
+            android:layout_weight="0.5"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:textColor="#E06A80"
+            android:format24Hour="HH:mm"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="30dp"
+        android:gravity="left">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="DON'T FORGET!"
+            android:textSize="23dp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/shape"
+            android:elevation="10dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="20dp"
         android:gravity="center">
@@ -44,24 +144,12 @@
             android:id="@+id/recycler_view"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginTop="20dp"
-        android:gravity="center">
 
-        <Button
-            android:id="@+id/scan_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Scan" />
-    </LinearLayout>
 
 </LinearLayout>
 
