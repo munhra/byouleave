@@ -41,8 +41,8 @@ public class WifiConnection extends AppCompatActivity {
     static WifiManager myWifiManager;
     Context myContext;
     WifiConfiguration myWifiConfiguration;
-    public static String netWorkSSID = "Jonaphael ESP";
-    public static  String  netWorkPass="esp8266esp";
+    public static String netWorkSSID = "SSID";
+    public static  String  netWorkPass="PASSWORD";
     byte[] buf = new byte[50]; // to recieve Informations
 
     Socket socket;
