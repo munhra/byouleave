@@ -173,26 +173,38 @@ public class BluetoothConnection extends Service {
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicRead(gatt, characteristic, status);
                 Log.v("BYouLeave","onCharacteristicRead");
+
+                Intent read = new Intent(BROADCAST_ACTION);
+                read.putExtra("Status BLE", "DOORSTATU: " + bytesToString2(characteristic.getValue()));
+                Log.w("ON CHARACTERISTIC READ", bytesToString2(characteristic.getValue()));
+                sendBroadcast(read);
             }
+
+
 
             @Override
             public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicWrite(gatt, characteristic, status);
                 Log.v("BYouLeave","onCharacteristicWrite");
+
+                Intent read = new Intent(BROADCAST_ACTION);
+                read.putExtra("Status BLE", "DOORSTATU: " + bytesToString2(characteristic.getValue()));
+                Log.w("ON CHARACTERISTIC WRITE", bytesToString2(characteristic.getValue()));
+                sendBroadcast(read);
             }
 
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
                 Log.v("BYouLeave","onCharacteristicChanged "+bytesToString2(characteristic.getValue()));
-                final String bleText = bytesToString2(characteristic.getValue());
-                final TextView statusText = (TextView) layout.findViewById(R.id.doorStatusText);
+                /*final String bleText = bytesToString2(characteristic.getValue());
+                final TextView statusText = (TextView) layout.findViewById(R.id.DoorStatus);
                 statusText.post(new Runnable() {
                     @Override
                     public void run() {
                         statusText.setText(bleText);
                     }
-                });
+                });*/
                 Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
                 atualizarStatusBLE.putExtra("Status BLE", "OPENEDDOO: " + bytesToString2(characteristic.getValue()));
                 sendBroadcast(atualizarStatusBLE);
@@ -235,7 +247,7 @@ public class BluetoothConnection extends Service {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.activity_main, null);
 
-        final Button button = (Button) layout.findViewById(R.id.scan_button);
+        /*final Button button = (Button) layout.findViewById(R.id.scan_button);
         button.setOnClickListener(new View.OnClickListener(){
 
             public void onClick(View v) {
@@ -244,7 +256,7 @@ public class BluetoothConnection extends Service {
                 btAdapter.startLeScan(lesScanCallBack);
             }
 
-        });
+        });*/
     }
 
     public static String bytesToString2(byte[] bytes) {

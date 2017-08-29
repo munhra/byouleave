@@ -97,17 +97,31 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
     }
 
     Runnable mStatusChecker = new Runnable() {
+
         @Override
+
         public void run() {
+
             try {
-                getResultsFromApi();
+
+                new MakeRequestTask(mCredential).execute();
+
+//                getResultsFromApi();
+
                 //updateStatus(); //this function can change value of mInterval.
+
             } finally {
+
                 // 100% guarantee that this always happens, even if
+
                 // your update method throws an exception
+
                 mHandler.postDelayed(mStatusChecker, 5000);
+
             }
+
         }
+
     };
 
     void startRepeatingTask() {
@@ -127,22 +141,47 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
      * appropriate.
      */
     private void getResultsFromApi() {
+
         if (!isGooglePlayServicesAvailable()) {
+
             acquireGooglePlayServices();
+
         }else if (!EasyPermissions.hasPermissions(
+
                 MainActivity.getContext(), Manifest.permission.GET_ACCOUNTS)) {
+
             EasyPermissions.requestPermissions(
+
                     MainActivity.getActivity(),
+
                     "This app needs to access your Google account (via Contacts).",
+
                     REQUEST_PERMISSION_GET_ACCOUNTS,
+
                     Manifest.permission.GET_ACCOUNTS);
+
         } else if (mCredential.getSelectedAccountName() == null) {
+
             chooseAccount();
+
         } else if (!isDeviceOnline()) {
+
 //            mOutputText.setText("No network connection available.");
+
         } else {
-            new MakeRequestTask(mCredential).execute();
+
+//            new MakeRequestTask(mCredential).execute();
+
+            startRepeatingTask();
+
         }
+
+    }
+
+    void startTask() {
+
+        getResultsFromApi();
+
     }
 
     /**
@@ -189,10 +228,9 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
      * @param data        Intent (containing result data) returned by incoming
      *                    activity result.
      */
-    @Override
     protected void onActivityResult(
             int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+
         switch (requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
@@ -369,10 +407,15 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
         private List<String> getDataFromApi() throws IOException {
             // List the next 10 events from the primary calendar.
             DateTime now = new DateTime(System.currentTimeMillis());
+            DateTime endOfDay = new DateTime((System.currentTimeMillis() + 1000000) + (System.currentTimeMillis()%86400000));
+
+            /*Log.e("X", ">>>>>>>>> NOW: " + now);
+            Log.e("X", ">>>>>>>>> ENTIRE: " + endOfDay);*/
+
             List<String> eventStrings = new ArrayList<String>();
             Events events = mService.events().list("primary")
-                    .setMaxResults(10)
                     .setTimeMin(now)
+                    .setTimeMax(endOfDay)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute();
@@ -386,7 +429,7 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
                     start = event.getStart().getDate();
                 }
                 eventStrings.add(
-                        String.format("Title: %s Description: %s Start: %s\n", event.getSummary(), event.getDescription(), start));
+                        String.format("%s\n", event.getSummary()));
             }
             return eventStrings;
         }
