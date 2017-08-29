@@ -82,6 +82,7 @@ public class BluetoothConnection extends Service {
 
     @Override
     public void onDestroy(){
+        stopSelf();
         Log.e("Service Lifestyle", "Ending Service");
     }
 
@@ -127,14 +128,9 @@ public class BluetoothConnection extends Service {
                 Log.v("BYouLeave","onConnectionStateChange");
                 bluetoothGatt.discoverServices();
 
-                /*statusText.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        statusText.setText("BLE Connected");
-                    }
-                });*/
                 Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
-                atualizarStatusBLE.putExtra("Status BLE", "STATUSBLE: Connected");
+                atualizarStatusBLE.putExtra("Status BLE", "STATUSBLE: " + newState);
+                Log.e("Status BLE", "STATUSBLE: " + newState);
                 sendBroadcast(atualizarStatusBLE);
             }
 
