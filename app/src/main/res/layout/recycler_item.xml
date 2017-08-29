@@ -11,10 +11,12 @@
         android:id="@+id/event"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:gravity="left"
         android:text="Event"
-        android:textSize="25dp"
+        android:textSize="30dp"
         android:textColor="#FFFFFF"/>
+
+
 
 
 </LinearLayout>

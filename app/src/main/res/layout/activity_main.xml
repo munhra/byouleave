@@ -75,23 +75,25 @@
             android:gravity="left"
             android:layout_weight="0.5">
 
-            <TextView
+            <TextClock
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Thursday"
+                android:paddingRight="20dp"
                 android:textSize="24dp"
                 android:textStyle="bold"
-                android:textColor="#E06A80"/>
+                android:textColor="#E06A80"
+                android:format24Hour="EEEE"/>
 
-            <TextView
+            <TextClock
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="August 24"
+                android:paddingRight="20dp"
                 android:textSize="20dp"
                 android:textStyle="bold"
-                android:textColor="#E06A80"/>
+                android:textColor="#E06A80"
+                android:format24Hour="MMMM dd"/>
 
         </LinearLayout>
 
