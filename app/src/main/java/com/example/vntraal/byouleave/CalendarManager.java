@@ -407,10 +407,15 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
         private List<String> getDataFromApi() throws IOException {
             // List the next 10 events from the primary calendar.
             DateTime now = new DateTime(System.currentTimeMillis());
+            DateTime endOfDay = new DateTime((System.currentTimeMillis() + 1000000) + (System.currentTimeMillis()%86400000));
+
+            /*Log.e("X", ">>>>>>>>> NOW: " + now);
+            Log.e("X", ">>>>>>>>> ENTIRE: " + endOfDay);*/
+
             List<String> eventStrings = new ArrayList<String>();
             Events events = mService.events().list("primary")
-                    .setMaxResults(10)
                     .setTimeMin(now)
+                    .setTimeMax(endOfDay)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute();
@@ -424,7 +429,7 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
                     start = event.getStart().getDate();
                 }
                 eventStrings.add(
-                        String.format("Title: %s Description: %s Start: %s\n", event.getSummary(), event.getDescription(), start));
+                        String.format("%s\n", event.getSummary()));
             }
             return eventStrings;
         }

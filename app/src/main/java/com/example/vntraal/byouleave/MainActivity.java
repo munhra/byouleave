@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            TextView statusBLE = (TextView) findViewById(R.id.BluetoothStatus);
-            TextView doorAction = (TextView) findViewById(R.id.DoorStatus);
+            //TextView statusBLE = (TextView) findViewById(R.id.BluetoothStatus);
+            TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
 
 
             String actionName = intent.getStringExtra("Status BLE").substring(0,9);
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
                     break;
                 case "STATUSBLE":
-                    statusBLE.setText("Bluetooth Connected");
+                    doorAction.setText("Bluetooth Connected");
 
                     playNotificationSound();
                     break;
@@ -111,11 +111,11 @@ public class MainActivity extends AppCompatActivity {
                             Log.e("Action", "Door has been opened");
                             Unlock();
                             break;
-                        default: statusBLE.setText("Problems with the Message"); doorAction.setText("Problems with the Message"); break;
+                        default: doorAction.setText("Problems with the Message"); doorAction.setText("Problems with the Message"); break;
                     }
 
                     break;
-                default: statusBLE.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
+                default: doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
 
             }
         }
@@ -203,10 +203,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
             calendarManager.startTask();
-            //callAsynchronousTask();
             startService(new Intent(getBaseContext(), BluetoothConnection.class));
-            //checkBLEAvaiability();
-            //calendarManager.startRepeatingTask();
+
         }
     }
 
@@ -218,25 +216,11 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
                     calendarManager.startTask();
-                    //callAsynchronousTask();
                     startService(new Intent(getBaseContext(), BluetoothConnection.class));
                 }
 
                 break;
         }
-    }
-
-    private void defineButtonClick() {
-        final Button button = (Button) findViewById(R.id.scan_button);
-        button.setOnClickListener(new View.OnClickListener(){
-
-            public void onClick(View v) {
-                // Code here executes on main thread after user presses button
-                Log.v("BYouLeave","Start Scan...");
-                Log.e("BT","Button was Clicked!");
-            }
-
-        });
     }
 
     public void playNotificationSound() {

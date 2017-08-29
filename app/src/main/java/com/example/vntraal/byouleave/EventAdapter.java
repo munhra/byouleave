@@ -20,11 +20,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     private ArrayList<String> mData = new ArrayList<String>();
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
-        public TextView mTextView;
+        public View eventView;
+        public TextView appointment;
 
-        public ViewHolder(TextView v){
+        public ViewHolder(View v){
             super(v);
-            mTextView = v;
+            eventView = v;
+            appointment = (TextView) v.findViewById(R.id.event);
         }
     }
 
@@ -44,7 +46,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     @Override
     public EventAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.event_list_item, parent, false);
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.recycler_item, parent, false);
 
         ViewHolder vh = new ViewHolder(v);
         return vh;
@@ -52,7 +55,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(EventAdapter.ViewHolder holder, int position) {
-        holder.mTextView.setText(mData.get(position));
+        holder.appointment.setText(mData.get(position));
     }
 
     @Override
