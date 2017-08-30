@@ -90,16 +90,16 @@ public class BluetoothConnection extends Service {
         Log.e("Service State", "Entering in BLEActivity");
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
-        if (btAdapter != null && !btAdapter.isEnabled()) {
+        while (btAdapter != null && !btAdapter.isEnabled()) {
             Log.v("BYouLeave","Adapter not ready");
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             //startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
-        }else{
+        }
             Log.v("BYouLeave","Adapter ready enable button");
             createScanCallBack();
             btAdapter.startLeScan(lesScanCallBack);
             defineButtonClick();
-        }
+
     }
 
     private void createScanCallBack() {
