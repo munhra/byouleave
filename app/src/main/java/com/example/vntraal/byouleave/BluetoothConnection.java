@@ -82,6 +82,7 @@ public class BluetoothConnection extends Service {
 
     @Override
     public void onDestroy(){
+        stopSelf();
         Log.e("Service Lifestyle", "Ending Service");
     }
 
@@ -89,16 +90,16 @@ public class BluetoothConnection extends Service {
         Log.e("Service State", "Entering in BLEActivity");
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
-        if (btAdapter != null && !btAdapter.isEnabled()) {
+        while (btAdapter != null && !btAdapter.isEnabled()) {
             Log.v("BYouLeave","Adapter not ready");
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             //startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
-        }else{
+        }
             Log.v("BYouLeave","Adapter ready enable button");
             createScanCallBack();
             btAdapter.startLeScan(lesScanCallBack);
             defineButtonClick();
-        }
+
     }
 
     private void createScanCallBack() {
@@ -127,14 +128,9 @@ public class BluetoothConnection extends Service {
                 Log.v("BYouLeave","onConnectionStateChange");
                 bluetoothGatt.discoverServices();
 
-                /*statusText.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        statusText.setText("BLE Connected");
-                    }
-                });*/
                 Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
-                atualizarStatusBLE.putExtra("Status BLE", "STATUSBLE: Connected");
+                atualizarStatusBLE.putExtra("Status BLE", "STATUSBLE: " + newState);
+                Log.e("Status BLE", "STATUSBLE: " + newState);
                 sendBroadcast(atualizarStatusBLE);
             }
 

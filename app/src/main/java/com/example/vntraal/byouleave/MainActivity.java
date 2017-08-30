@@ -90,7 +90,20 @@ public class MainActivity extends AppCompatActivity {
 
                     break;
                 case "STATUSBLE":
-                    doorAction.setText("Bluetooth Connected");
+                    switch(actionStatus.trim()){
+                        case "2": doorAction.setText("Bluetooth Connected"); break;
+                        default: doorAction.setText("Bluetooth Disconnected");
+                            Toast.makeText(getContext(),"Trying to Reconnect", Toast.LENGTH_LONG).show();
+                            stopService(new Intent(getBaseContext(), BluetoothConnection.class));
+
+                            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                            if (!mBluetoothAdapter.isEnabled()) {
+                                mBluetoothAdapter.enable();
+                            }
+
+                            startService(new Intent(getBaseContext(), BluetoothConnection.class));
+                            break;
+                    }
 
                     playNotificationSound();
                     break;
