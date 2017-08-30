@@ -85,13 +85,14 @@
                 android:textColor="#E06A80"/>
 
             <TextView
+                android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="August 24"
+                android:textColor="#E06A80"
                 android:textSize="20dp"
-                android:textStyle="bold"
-                android:textColor="#E06A80"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 

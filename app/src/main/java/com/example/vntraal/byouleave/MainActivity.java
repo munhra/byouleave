@@ -56,12 +56,12 @@ public class MainActivity extends AppCompatActivity {
     private static Activity mActivity;
     private static SharedPreferences mSettings;
     private static ConnectivityManager mConnMgr;
-    private BluetoothManager btManager;
-    private final static int REQUEST_ENABLE_BT = 1;
-    private BluetoothAdapter.LeScanCallback lesScanCallBack;
-    private BluetoothAdapter btAdapter;
-    private BluetoothGattCallback btleGattCallback;
-    private BluetoothGatt bluetoothGatt;
+  //  private BluetoothManager btManager;
+ //   private final static int REQUEST_ENABLE_BT = 1;
+ //   private BluetoothAdapter.LeScanCallback lesScanCallBack;
+ //   private BluetoothAdapter btAdapter;
+//    private BluetoothGattCallback btleGattCallback;
+//    private BluetoothGatt bluetoothGatt;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter meuAdapter = new EventAdapter();
     private RecyclerView.LayoutManager mLayoutManager;
@@ -78,15 +78,45 @@ public class MainActivity extends AppCompatActivity {
             TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
 
 
-            String actionName = intent.getStringExtra("Status BLE").substring(0,9);
+           /* String actionName = intent.getStringExtra("Status BLE").substring(0,9);
             String actionStatus = intent.getStringExtra("Status BLE").substring(11);
-            Log.e("BR",actionStatus);
+            Log.e("BR",actionStatus);*/
+
+           String status = intent.getStringExtra("Status DOOR").substring(0,12);
+
+            playNotificationSound();
 
             List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
 
-            switch (actionName) {
+            Log.e("status",status);
+
+            switch (status){
+                case "Conectado000":
+                    doorAction.setText("Wifi Connected");
+                    playNotificationSound();
+                    break;
+
+                case "Porta Aberta":
+                    ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                    ((EventAdapter) meuAdapter).setmData(lista);
+                    Log.e("Action", "Door has been opened");
+                    doorAction.setText("Porta Aberta");
+                    Unlock();
+                    break;
+
+                case "Porta Fechad":
+                    ((EventAdapter) meuAdapter).resetData();
+                    Log.e("Action", "Door has been closed");
+                    doorAction.setText("Porta Fechada");
+                    fadeOut();
+                    break;
+
+                default: doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
+            }
+
+     /*       switch (status) {
                 case "DOORSTATU":
-                    doorAction.setText(actionStatus);
+                    doorAction.setText(status);
 
                     break;
                 case "STATUSBLE":
@@ -98,8 +128,8 @@ public class MainActivity extends AppCompatActivity {
                     playNotificationSound();
 
 
-                    doorAction.setText(actionStatus);
-                    switch (actionStatus.trim()){
+                    doorAction.setText(status);
+                    switch (status.trim()){
                         case "Switch CLOSED":
                             ((EventAdapter) meuAdapter).resetData();
                             Log.e("Action", "Door has been closed");
@@ -117,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 default: doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
 
-            }
+            }*/
         }
     };
 
@@ -143,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
 
         checkPermitions();
 
-        registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
+        registerReceiver(broadcastReceiver, new IntentFilter(WifiConnection.BROADCAST_ACTION));
 
 
     }
@@ -201,9 +231,9 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
-            btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+            calendarManager = CalendarManager.getInstance();
             calendarManager.startTask();
-            startService(new Intent(getBaseContext(), BluetoothConnection.class));
+            startService(new Intent(getBaseContext(), WifiConnection.class));
 
         }
     }
@@ -214,9 +244,8 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSION_ACCESS_COARSE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
                     calendarManager.startTask();
-                    startService(new Intent(getBaseContext(), BluetoothConnection.class));
+                    startService(new Intent(getBaseContext(), WifiConnection.class));
                 }
 
                 break;
