@@ -429,7 +429,7 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
                     start = event.getStart().getDate();
                 }
                 eventStrings.add(
-                        String.format("%s\n", event.getSummary()));
+                        String.format("%s", event.getSummary()));
             }
             return eventStrings;
         }
