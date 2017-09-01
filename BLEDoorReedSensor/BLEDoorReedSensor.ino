@@ -2,8 +2,6 @@
 #include <ESP8266WiFi.h>
 #include <ArduinoOTA.h>
 #include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>
 #include <SoftwareSerial.h>
 
 //wifi
@@ -20,10 +18,8 @@ const char* host = "192.168.42.1";
 
 boolean sendClosedBLEInfo = true;
 boolean sendOpenedBLEInfo = true;
-boolean stopWIFISearch = false;
 
 const int REED_PIN = 2; // Pin connected to reed switch
-const int LED_PIN = 0; // LED pin - active-high
 
 SoftwareSerial BTSerial(0, 1); // RX | TX
 
@@ -34,52 +30,36 @@ void setup()
   BTSerial.begin(9600);  // HM-10 default speed in AT command more
   Serial.begin(9600);
   pinMode(REED_PIN, INPUT_PULLUP);
-  pinMode(LED_PIN, OUTPUT);
-  //digitalRead(REED_PIN)
-  //setupWifi();
+  setupWifi();
   //sendRegister();
-  //setupFOTA();
+  setupFOTA();
 }
 
 void loop()
 {
-  /*
-  if (closed) {
-    BTSerial.write("Open");  
-  }else{
-    BTSerial.write("Close");
-  }
-  closed = !closed;
-  delay(10000);
-  */
-  stopWIFISearch = false;
   int proximity = digitalRead(REED_PIN); // Read the state of the switch
   if (proximity == LOW) // If the pin reads low, the switch is closed.
   {
-    //Serial.println("Switch CLOSED");
-    digitalWrite(LED_PIN, HIGH); // Turn the LED on
     if (sendClosedBLEInfo) {
       Serial.println("Switch CLOSED");
       BTSerial.write("Close");
       sendClosedBLEInfo = false;
       sendOpenedBLEInfo = true;
-      //sendDetectionPost("0");
+      delay(100);
+      sendDetectionPost("0");
     }
   }
   else
   {
-    //Serial.println("Switch OPEN");
-    digitalWrite(LED_PIN, LOW); // Turn the LED off
     if (sendOpenedBLEInfo) {
       Serial.println("Switch OPEN");
       BTSerial.write("Open");
       sendClosedBLEInfo = true;
       sendOpenedBLEInfo = false;   
-      //sendDetectionPost("1"); 
-    }
-   
+      delay(100);
+      sendDetectionPost("1"); 
+    } 
   }
-  //delay(1000);
 }
 
 void setupWifi() {
@@ -102,15 +82,7 @@ void setupWifi() {
 }
 
 void setupFOTA() {
-  // Port defaults to 8266
-  // ArduinoOTA.setPort(8266);
-
-  // Hostname defaults to esp8266-[ChipID]
-     ArduinoOTA.setHostname("munhraESP8266");
-
-  // No authentication by default
-  // ArduinoOTA.setPassword((const char *)"123");
-
+  ArduinoOTA.setHostname("FutureHouseBFyouLeaveDoor");
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
   });
@@ -136,63 +108,24 @@ void setupFOTA() {
 
 void sendRegister()
 {
-  Serial.print("connecting to ");
-  Serial.println(host);
-  
-  // Use WiFiClient class to create TCP connections
   WiFiClient client;
   const int httpPort = 3000;
-  
-  /*
-  if (!client.connect(host, httpPort)) {
-    Serial.println("connection failed");
-    setupWifi();
-  }*/
-
+  client.connect(host, httpPort);
   String url = "/api/sensor/register?roomName="+roomName+"&mac="+getMacAddress()+"&ip="+ipToString(WiFi.localIP());
-
-  Serial.print("Requesting URL: ");
-  Serial.println(url);
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
-  Serial.println();
-  Serial.println("closing connection");
 }
 
 void sendDetectionPost(String detected) {
-
-  Serial.print("connecting to ");
-  Serial.println(host);
-  
-  // Use WiFiClient class to create TCP connections
   WiFiClient client;
   const int httpPort = 3000;
-
-  
-  if (!client.connect(host, httpPort)) {
-    Serial.println("connection failed");
-    setupWifi();
-  }
-
+  client.connect(host, httpPort);
   String url = "/api/sensor?roomName="+roomName+"&mac="+getMacAddress()+"&ip="+ipToString(WiFi.localIP())+"&presence="+detected;
-
-  Serial.print("Requesting URL: ");
-  Serial.println(url);
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
-  /*
   delay(500);
-
-   while(client.available()){
-    String line = client.readStringUntil('\r');
-    Serial.print(line);
-  }*/
-  
-  Serial.println();
-  Serial.println("closing connection");
-
 }
 
 String ipToString(IPAddress ip){
