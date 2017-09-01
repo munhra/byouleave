@@ -25,19 +25,23 @@ SoftwareSerial BTSerial(0, 1); // RX | TX
 
 String roomName = "garage";
 
+//Debug
+long lastMillis = 0;
+
+
 void setup()
 {
-  BTSerial.begin(9600);  // HM-10 default speed in AT command more
-  Serial.begin(9600);
   pinMode(REED_PIN, INPUT_PULLUP);
   setupWifi();
-  //sendRegister();
   setupFOTA();
+  BTSerial.begin(9600);  // HM-10 default speed in AT command more
+  Serial.begin(9600);
 }
 
 void loop()
 {
   int proximity = digitalRead(REED_PIN); // Read the state of the switch
+  sendDebug();
   if (proximity == LOW) // If the pin reads low, the switch is closed.
   {
     if (sendClosedBLEInfo) {
@@ -63,37 +67,29 @@ void loop()
 }
 
 void setupWifi() {
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  
   WiFi.begin(ssid, password);
-  
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
   }
+}
 
-  Serial.println("");
-  Serial.println("WiFi connected");  
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+void sendDebug() {
+  long currentMillis = millis();
+  if (currentMillis - lastMillis > 15000) {
+    sendDebugPost("0");
+    lastMillis = currentMillis;
+  }  
 }
 
 void setupFOTA() {
   ArduinoOTA.setHostname("FutureHouseBFyouLeaveDoor");
   ArduinoOTA.onStart([]() {
-    Serial.println("Start");
   });
   ArduinoOTA.onEnd([]() {
-    Serial.println("\nEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
     else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
     else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
@@ -101,9 +97,6 @@ void setupFOTA() {
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
   ArduinoOTA.begin();
-  Serial.println("Ready this one as uploaded by FOTA Sensor !!!");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
 }
 
 void sendRegister()
@@ -126,6 +119,20 @@ void sendDetectionPost(String detected) {
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
   delay(500);
+}
+
+void sendDebugPost(String detected) {
+  WiFiClient client;
+  const int httpPort = 3000;
+  if (!client.connect(host, httpPort)) {
+    ESP.restart();
+    return;
+  }
+  String url = "/api/sensor/debug?roomName="+roomName+"&mac="+getMacAddress()+"&ip="+ipToString(WiFi.localIP())+"&presence="+detected+
+               "&maxdistance=0&mindistance=0&averagedistance=0&averagediameter=0";
+  client.print(String("POST ") + url + " HTTP/1.1\r\n" +
+               "Host: " + host + "\r\n" + 
+               "Connection: close\r\n\r\n");
 }
 
 String ipToString(IPAddress ip){
