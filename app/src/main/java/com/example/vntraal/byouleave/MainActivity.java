@@ -269,8 +269,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
             calendarManager.startTask();
-//            startService(new Intent(getBaseContext(), BluetoothConnection.class));
-            callAsynchronousTask();
+            startService(new Intent(getBaseContext(), BluetoothConnection.class));
+//            callAsynchronousTask();
         }
     }
 

@@ -33,14 +33,12 @@ public class WaveView extends View {
     int lineThickness = 5;
     int amplitudeFactor = 12;
     int period = 50;
-    int amplitude = 80;
     private float shift = 0;
+    private float speed = (float) 0.1;
 
     private int quadrant;
 
     Path firstWavePath = new Path();
-
-    private float speed = (float) 0.1;
 
     public WaveView(Context context) {
         super(context);
@@ -59,7 +57,7 @@ public class WaveView extends View {
         firstWaveColor = new Paint();
         firstWaveColor.setAntiAlias(true);
         firstWaveColor.setStrokeWidth(2);
-        firstWaveColor.setColor(Color.parseColor("#FFFFFF"));
+        firstWaveColor.setColor(Color.parseColor("#FFFFFF")); //Wave color
 
         handler = new Handler();
         handler.postDelayed(new WaveRunnable(), 16);
@@ -69,7 +67,7 @@ public class WaveView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawColor(Color.alpha(0));
+        canvas.drawColor(Color.alpha(0));   //Background color
         quadrant = getHeight()/2;
         width = canvas.getWidth();
 
@@ -77,6 +75,7 @@ public class WaveView extends View {
 
         int i;
 
+        // Top Contour
         for (i = 0; i < width + 10; i = i + 10) {
             x = (float) i;
 
@@ -84,8 +83,8 @@ public class WaveView extends View {
 
             firstWavePath.lineTo(x, y);
         }
-        firstWavePath.lineTo(getWidth(), lineThickness);
 
+        // Bottom contour
         for (i = i + 0; i >= 0; i = i - 10) {
             x = (float) i;
 
