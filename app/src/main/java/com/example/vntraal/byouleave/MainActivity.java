@@ -18,6 +18,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.AnimationDrawable;
+import android.media.Image;
 import android.media.Ringtone;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -30,6 +32,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +40,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -156,6 +161,33 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private final RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+            LinearLayoutManager layoutManager = ((LinearLayoutManager)recyclerView.getLayoutManager());
+            int pos = layoutManager.findLastCompletelyVisibleItemPosition();
+            int numItems = recyclerView.getAdapter().getItemCount();
+            ImageView arrowDownAnimation = (ImageView) findViewById(R.id.arrowDownAnimation);
+
+            if (pos >= numItems - 1) {
+                arrowDownAnimation.setVisibility(View.INVISIBLE);
+                arrowDownAnimation.setBackgroundResource(R.drawable.arrow_down_animation);
+                AnimationDrawable anim = (AnimationDrawable) arrowDownAnimation.getBackground();
+                anim.stop();
+            } else {
+                arrowDownAnimation.setVisibility(View.VISIBLE);
+                arrowDownAnimation.setBackgroundResource(R.drawable.arrow_down_animation);
+                AnimationDrawable anim = (AnimationDrawable) arrowDownAnimation.getBackground();
+                anim.start();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,13 +200,33 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mRecyclerView.setAdapter(meuAdapter);
+
+        mRecyclerView.addOnScrollListener(mOnScrollListener);
+
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(), mRecyclerView,
+                new RecyclerItemListener.RecyclerTouchListener() {
+                    public void onClickItem(View v, int position) {
+
+                        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                        alert.setTitle(calendarManager.getCalendarRetults().get(position));
+                        alert.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                //Your action here
+                            }
+                        });
+                        alert.show();
+                    }
+
+                    public void onLongClickItem(View v, int position) {
+
+                    }
+        }));
 
         checkPermitions();
 
@@ -196,6 +248,10 @@ public class MainActivity extends AppCompatActivity {
                 handler.post(new Runnable() {
                     public void run() {
                         try {
+                            //ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                            //((EventAdapter) meuAdapter).setmData(lista);
+                            //Log.e("Assync", "Assync updated RecyclerView Adapter Data");
+
                             // Instantiate the RequestQueue.
                             RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
                             String url ="http://192.168.42.1:3000/garage";
@@ -221,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
                             };
 
                             queue.add(stringRequest);
+                          
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
                         }
@@ -230,9 +287,6 @@ public class MainActivity extends AppCompatActivity {
         };
         timer.schedule(doAsynchronousTask, 0, 2000); //execute in every 50000 ms
     }
-
-
-
 
 
 
@@ -300,9 +354,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                     }
-                });
-
-
+            });
         }
     }
 

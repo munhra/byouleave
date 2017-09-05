@@ -1,6 +1,8 @@
 package com.example.vntraal.byouleave;
 
+import android.app.Activity;
 import android.graphics.drawable.AnimationDrawable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,9 +22,10 @@ import android.os.Handler;
  * Created by vntjoig on 23/08/2017.
  */
 
-public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
+public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder>{
 
     private ArrayList<String> mData = new ArrayList<String>();
+    public View.OnClickListener mClickListener;
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         public View eventView;
@@ -48,6 +51,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             }, r.nextInt(1000 - 0));
 
         }
+
     }
 
     public void setmData(ArrayList<String> received){
@@ -70,6 +74,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                 .inflate(R.layout.recycler_item, parent, false);
 
         ViewHolder vh = new ViewHolder(v);
+
         return vh;
     }
 
