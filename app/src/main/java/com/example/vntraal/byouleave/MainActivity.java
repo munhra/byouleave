@@ -1,13 +1,10 @@
 package com.example.vntraal.byouleave;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.Dialog;
 import android.app.KeyguardManager;
-import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -28,7 +25,12 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.support.annotation.IdRes;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -37,19 +39,32 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.media.RingtoneManager.TYPE_NOTIFICATION;
 import static android.media.RingtoneManager.getDefaultUri;
@@ -75,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
 
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
     private CalendarManager calendarManager;
+    private AlertDialog.Builder builder;
+    private AlertDialog dialog;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -96,7 +113,10 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "STATUSBLE":
                     switch(actionStatus.trim()){
-                        case "2": doorAction.setText("Bluetooth Connected"); break;
+                        case "2":
+                            doorAction.setText("Bluetooth Connected");
+                            Toast.makeText(getContext(),"Bluetooth Connected", Toast.LENGTH_LONG).show();
+                            break;
                         default: doorAction.setText("Bluetooth Disconnected");
                             Toast.makeText(getContext(),"Trying to Reconnect", Toast.LENGTH_LONG).show();
                             stopService(new Intent(getBaseContext(), BluetoothConnection.class));
@@ -115,8 +135,10 @@ public class MainActivity extends AppCompatActivity {
                 case "OPENEDDOO":
                     playNotificationSound();
 
-
                     doorAction.setText(actionStatus);
+
+                    //192.168.42.1:3000/api/sensor/?mac=5C:CF:7F:8F:6E:83&presence=1&ip=0.0.0.0&roomname="garage"
+
                     switch (actionStatus.trim()){
                         case "Switch CLOSED":
                             ((EventAdapter) meuAdapter).resetData();
@@ -209,26 +231,53 @@ public class MainActivity extends AppCompatActivity {
         checkPermitions();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
-
-
     }
 
+    public interface VolleyCallback{
+        void onSuccess(String result);
+        void onErrorResponse(VolleyError error);
+    }
 
-    public void callAsynchronousTask() {
+    public void reconectionAsynchronousTask(final VolleyCallback callback) {
+
         final Handler handler = new Handler();
         Timer timer = new Timer();
         TimerTask doAsynchronousTask = new TimerTask() {
-
             @Override
             public void run() {
-
                 handler.post(new Runnable() {
                     public void run() {
                         try {
-                            ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
-                            ((EventAdapter) meuAdapter).setmData(lista);
-                            Log.e("Assync", "Assync updated RecyclerView Adapter Data");
+                            //ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                            //((EventAdapter) meuAdapter).setmData(lista);
+                            //Log.e("Assync", "Assync updated RecyclerView Adapter Data");
 
+                            // Instantiate the RequestQueue.
+                            RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                            String url ="http://192.168.42.1:3000/garage";
+
+                            // Request a string response from the provided URL.
+                            final StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                                    new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            callback.onSuccess(response);
+                                        }
+                                    }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    callback.onErrorResponse(error);
+                                }
+                            }) {
+                                @Override
+                                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                                    int mRequestCode = response.statusCode;
+                                    return super.parseNetworkResponse(response);
+                                }
+                            };
+
+                            queue.add(stringRequest);
+                          
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
                         }
@@ -236,8 +285,9 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(doAsynchronousTask, 0, 5000); //execute in every 5000 ms
-    };
+        timer.schedule(doAsynchronousTask, 0, 2000); //execute in every 50000 ms
+    }
+
 
 
     public static Context getContext() {
@@ -262,15 +312,49 @@ public class MainActivity extends AppCompatActivity {
         calendarManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    private boolean isServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
+            if("com.example.vntraal.byouleave.BluetoothConnection".equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private void checkPermitions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
+            Log.e("Check Permissions","Checking Permissions");
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
             calendarManager.startTask();
             startService(new Intent(getBaseContext(), BluetoothConnection.class));
-//            callAsynchronousTask();
+
+            builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage("Trying to reconnect...").setTitle("Server not responding");
+            dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+
+            reconectionAsynchronousTask(new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        if(dialog.isShowing()){
+                            dialog.dismiss();
+                            startService(new Intent(getBaseContext(), BluetoothConnection.class));
+                        }
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if(!dialog.isShowing()){
+                            dialog.show();
+                            stopService(new Intent(getBaseContext(), BluetoothConnection.class));
+                        }
+
+                    }
+            });
         }
     }
 
@@ -283,6 +367,24 @@ public class MainActivity extends AppCompatActivity {
                     btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
                     calendarManager.startTask();
                     startService(new Intent(getBaseContext(), BluetoothConnection.class));
+
+                    reconectionAsynchronousTask(new VolleyCallback() {
+                        @Override
+                        public void onSuccess(String result) {
+                            dialog.dismiss();
+                        }
+
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("GOOOOOOOO", "FAILURE " + error);
+                            if(!dialog.isShowing()){
+                                Log.e("gg","gogogo");
+                                if(!dialog.isShowing()){
+                                    dialog.show();
+                                }
+                            }
+                        }
+                    });
                 }
 
                 break;

@@ -1,37 +1,37 @@
-package com.example.vntraal.byouleave;
+         package com.example.vntraal.byouleave;
 
-import android.app.IntentService;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.Ringtone;
-import android.net.Uri;
-import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
+         import android.app.IntentService;
+         import android.app.PendingIntent;
+         import android.app.Service;
+         import android.bluetooth.BluetoothAdapter;
+         import android.bluetooth.BluetoothDevice;
+         import android.bluetooth.BluetoothGatt;
+         import android.bluetooth.BluetoothGattCallback;
+         import android.bluetooth.BluetoothGattCharacteristic;
+         import android.bluetooth.BluetoothGattDescriptor;
+         import android.bluetooth.BluetoothGattService;
+         import android.bluetooth.BluetoothManager;
+         import android.content.BroadcastReceiver;
+         import android.content.Context;
+         import android.content.Intent;
+         import android.content.IntentFilter;
+         import android.media.Ringtone;
+         import android.net.Uri;
+         import android.os.IBinder;
+         import android.support.v4.content.LocalBroadcastManager;
+         import android.util.Log;
+         import android.view.LayoutInflater;
+         import android.view.View;
+         import android.widget.Button;
+         import android.widget.TextView;
+         import android.widget.Toast;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
+         import java.io.UnsupportedEncodingException;
+         import java.util.List;
 
-import static android.media.RingtoneManager.TYPE_NOTIFICATION;
-import static android.media.RingtoneManager.getDefaultUri;
-import static android.media.RingtoneManager.getRingtone;
+         import static android.media.RingtoneManager.TYPE_NOTIFICATION;
+        import static android.media.RingtoneManager.getDefaultUri;
+        import static android.media.RingtoneManager.getRingtone;
 
 
 /**
@@ -95,10 +95,10 @@ public class BluetoothConnection extends Service {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             //startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
         }
-            Log.v("BYouLeave","Adapter ready enable button");
-            createScanCallBack();
-            btAdapter.startLeScan(lesScanCallBack);
-            defineButtonClick();
+        Log.v("BYouLeave","Adapter ready enable button");
+        createScanCallBack();
+        btAdapter.startLeScan(lesScanCallBack);
+        defineButtonClick();
 
     }
 
@@ -245,13 +245,11 @@ public class BluetoothConnection extends Service {
 
         /*final Button button = (Button) layout.findViewById(R.id.scan_button);
         button.setOnClickListener(new View.OnClickListener(){
-
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
                 Log.v("BYouLeave","Start Scan...");
                 btAdapter.startLeScan(lesScanCallBack);
             }
-
         });*/
     }
 
