@@ -18,9 +18,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Arrays;
 
 import static com.example.vntraal.byouleave.BluetoothConnection.BROADCAST_ACTION;
@@ -35,12 +39,14 @@ public class WifiConnection extends Service {
     static WifiManager myWifiManager;
     Context myContex;
     WifiConfiguration myWifiConfiguration;
-    private static String netWorkSSID = "FollowMe-Pi3";
-    private static String netWorkPass="FollowMeRadio";
+    private static String netWorkSSID = "Jonaphael ESP";
+    private static String netWorkPass="esp8266esp";
 
     private Socket mySocket;
-    private String ip = "192.168.42.14";
-    private  int port = 12345;
+    private String ipServer = "192.168.137.1";
+    private  int portServer = 3000;
+    private String ipESP = "";
+    private  int portEsp = 12345;
     DataInputStream mydataInputStream;
     byte [] buf  = new byte[20];
 
@@ -100,6 +106,30 @@ public class WifiConnection extends Service {
             NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             if(mWifi.isConnected()) {
                 try {
+                    // pegar o ip no ervidor mediante o get
+
+                    URL url = new URL("http://"+ipServer+":"+portServer+"/ipDoor");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.connect();
+                    Log.e("Mesage Request",connection.getResponseCode()+"");
+
+                    if (connection.getResponseCode() == 200 ) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line);
+                        }
+                        br.close();
+                        ipESP = sb.toString();
+                        Log.e("ip",ipESP);
+                    }
+                    else{
+                    Toast.makeText(getApplicationContext(),"Erro ao obter Ip do ESP",Toast.LENGTH_SHORT).show();
+                   }
+                    connection.disconnect();
+
                     recieveMessages();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -113,7 +143,7 @@ public class WifiConnection extends Service {
 
     private void recieveMessages() throws IOException {
         try {
-            mySocket = new Socket(ip,port);
+            mySocket = new Socket(ipESP,portEsp);
 
             Log.e("e","Conectado");
 

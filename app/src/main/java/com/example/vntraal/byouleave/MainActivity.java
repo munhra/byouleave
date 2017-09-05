@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
            String status = intent.getStringExtra("Status DOOR").substring(0,12);
 
-            playNotificationSound();
+        //    playNotificationSound();
 
             List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
 
@@ -96,9 +96,10 @@ public class MainActivity extends AppCompatActivity {
                     playNotificationSound();
                     break;
 
-                case "Porta Aberta":
+                case "Porta Aberta":br
                     ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
                     ((EventAdapter) meuAdapter).setmData(lista);
+                    playNotificationSound();
                     Log.e("Action", "Door has been opened");
                     doorAction.setText("Porta Aberta");
                     Unlock();
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
                 case "Porta Fechad":
                     ((EventAdapter) meuAdapter).resetData();
+                    playNotificationSound();
                     Log.e("Action", "Door has been closed");
                     doorAction.setText("Porta Fechada");
                     fadeOut();
