@@ -86,6 +86,7 @@
                 android:format24Hour="EEEE"
                 android:textAllCaps="true"/>
 
+
             <TextClock
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
