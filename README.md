@@ -1,5 +1,7 @@
 # byouleave
 
+- Before you leave google account byouleave@gmail.com, password: BeforeYouLeave
+
 ## Reed sensor circuit
 
 ##### Simple
