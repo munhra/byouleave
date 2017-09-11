@@ -200,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
         checkPermitions();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
-        startService(new Intent(String.valueOf(LockScreenService.class)));
     }
 
     public interface VolleyCallback{
