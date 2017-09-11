@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
             switch (status){
                 case "Conectado000":
                     doorAction.setText("Wifi Connected");
-                    playNotificationSound();
+                    //playNotificationSound();
                     break;
 
                 case "Porta Aberta":
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     fadeOut();
                     break;
 
-                default: doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
+                default: doorAction.setText("Wifi Disabled");
             }
 
      /*       switch (status) {

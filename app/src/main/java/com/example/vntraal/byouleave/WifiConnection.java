@@ -39,11 +39,11 @@ public class WifiConnection extends Service {
     static WifiManager myWifiManager;
     Context myContex;
     WifiConfiguration myWifiConfiguration;
-    private static String netWorkSSID = "Jonaphael ESP";
-    private static String netWorkPass="esp8266esp";
+    private static String netWorkSSID = "FollowMe-Pi3";
+    private static String netWorkPass="FollowMeRadio";
 
     private Socket mySocket;
-    private String ipServer = "192.168.137.1";
+    private String ipServer = "192.168.42.1";
     private  int portServer = 3000;
     private String ipESP = "";
     private  int portEsp = 12345;
@@ -80,7 +80,6 @@ public class WifiConnection extends Service {
         StrictMode.ThreadPolicy myThreadPolicy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(myThreadPolicy);
 
-        Log.e("Service State", "btManager got SystemService");
         checkWIFIAvaiability();
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         layout = inflater.inflate(R.layout.activity_main, null);
@@ -135,8 +134,13 @@ public class WifiConnection extends Service {
                     e.printStackTrace();
                 }
             }
-            else
+            else{
+                Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
+                atualizarStatusBLE.putExtra("Status DOOR", "Wifi Nao Conectado");
+                sendBroadcast(atualizarStatusBLE);
                 Log.e("Service State", "Wifi Não Conectado");
+            }
+
         }
 
     }
@@ -154,6 +158,7 @@ public class WifiConnection extends Service {
 
         } catch (IOException e) {
             e.printStackTrace();
+
         }
 
     }
@@ -175,10 +180,16 @@ public class WifiConnection extends Service {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
+                atualizarStatusBLE.putExtra("Status DOOR", "Wifi Nao Conectado");
+                sendBroadcast(atualizarStatusBLE);
+                Log.e("Service State", "Wifi Não Conectado");
+                onDestroy();
             }
-            finally {
+           /* finally {
                 Toast.makeText(getApplicationContext(),"Ending Connection", Toast.LENGTH_SHORT).show();
             }
+            */
         }
     }
 }
