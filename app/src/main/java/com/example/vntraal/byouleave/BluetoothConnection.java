@@ -59,9 +59,7 @@ public class BluetoothConnection extends Service {
 
     @Override
     public void onCreate(){
-        Log.e("Service State", "Service has been created");
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-        Log.e("Service State", "btManager got SystemService");
         checkBLEAvaiability();
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         layout = inflater.inflate(R.layout.activity_main, null);
@@ -83,11 +81,9 @@ public class BluetoothConnection extends Service {
     @Override
     public void onDestroy(){
         stopSelf();
-        Log.e("Service Lifestyle", "Ending Service");
     }
 
     private void checkBLEAvaiability() {
-        Log.e("Service State", "Entering in BLEActivity");
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
         while (btAdapter != null && !btAdapter.isEnabled()) {
@@ -120,7 +116,6 @@ public class BluetoothConnection extends Service {
     }
 
     private void createConnectionCallBack() {
-        Log.e("STATUS", "On connection callback");
         btleGattCallback = new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -130,7 +125,6 @@ public class BluetoothConnection extends Service {
 
                 Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
                 atualizarStatusBLE.putExtra("Status BLE", "STATUSBLE: " + newState);
-                Log.e("Status BLE", "STATUSBLE: " + newState);
                 sendBroadcast(atualizarStatusBLE);
             }
 

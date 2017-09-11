@@ -409,8 +409,8 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
             DateTime now = new DateTime(System.currentTimeMillis());
             DateTime endOfDay = new DateTime((System.currentTimeMillis() + 1000000) + (System.currentTimeMillis()%86400000));
 
-            /*Log.e("X", ">>>>>>>>> NOW: " + now);
-            Log.e("X", ">>>>>>>>> ENTIRE: " + endOfDay);*/
+            /*""", ">>>>>>>>> NOW: " + now);
+            """, ">>>>>>>>> ENTIRE: " + endOfDay);*/
 
             List<String> eventStrings = new ArrayList<String>();
             Events events = mService.events().list("primary")

@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.IdRes;
@@ -36,6 +37,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -88,31 +92,35 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog.Builder builder;
     private AlertDialog dialog;
 
+
+    private BroadcastReceiver lockScreenReceiver;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             //TextView statusBLE = (TextView) findViewById(R.id.BluetoothStatus);
-            TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
 
 
             String actionName = intent.getStringExtra("Status BLE").substring(0,9);
             String actionStatus = intent.getStringExtra("Status BLE").substring(11);
-            Log.e("BR",actionStatus);
 
             List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
 
             switch (actionName) {
                 case "DOORSTATU":
+                    TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
                     doorAction.setText(actionStatus);
 
                     break;
                 case "STATUSBLE":
                     switch(actionStatus.trim()){
                         case "2":
+                            doorAction = (TextView) findViewById(R.id.doorStatusText);
                             doorAction.setText("Bluetooth Connected");
                             Toast.makeText(getContext(),"Bluetooth Connected", Toast.LENGTH_LONG).show();
                             break;
-                        default: doorAction.setText("Bluetooth Disconnected");
+                        default:
+                            doorAction = (TextView) findViewById(R.id.doorStatusText);
+                            doorAction.setText("Bluetooth Disconnected");
                             Toast.makeText(getContext(),"Trying to Reconnect", Toast.LENGTH_LONG).show();
                             stopService(new Intent(getBaseContext(), BluetoothConnection.class));
 
@@ -130,32 +138,46 @@ public class MainActivity extends AppCompatActivity {
                 case "OPENEDDOO":
                     playNotificationSound();
 
-                    doorAction.setText(actionStatus);
-
                     //192.168.42.1:3000/api/sensor/?mac=5C:CF:7F:8F:6E:83&presence=1&ip=0.0.0.0&roomname="garage"
+                    //final ViewGroup viewGroup = (ViewGroup) findViewById(R.id.mainLayout);
+                    //viewGroup.removeAllViews();
+                    //viewGroup.setPadding(0, 0, 0, 0);
+                    Intent changeToDoorLockedView = new Intent(getContext(), LockedScreen.class);
+                    Intent changeToDoorOpenedView = new Intent(getContext(), MainActivity.class);
 
                     switch (actionStatus.trim()){
                         case "Switch CLOSED":
-                            ((EventAdapter) meuAdapter).resetData();
-                            Log.e("Action", "Door has been closed");
-                            fadeOut();
+                            startActivityForResult(changeToDoorLockedView, 0);
                             break;
                         case "Switch OPEN":
+                            finishActivity(0);
+
+                            doorAction = (TextView) findViewById(R.id.doorStatusText);
+                            doorAction.setText(actionStatus);
+
                             ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
                             ((EventAdapter) meuAdapter).setmData(lista);
-                            Log.e("Action", "Door has been opened");
-                            Unlock();
+                            for(String event : lista){Log.e("X", event);}
+                            Log.e("Go", "Jussssst Go!");
+
                             break;
-                        default: doorAction.setText("Problems with the Message"); doorAction.setText("Problems with the Message"); break;
+                        default:
+                            doorAction = (TextView) findViewById(R.id.doorStatusText);
+                            doorAction.setText("Problems with the Message"); doorAction.setText("Problems with the Message"); break;
                     }
 
                     break;
-                default: doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
+                default:
+                    doorAction = (TextView) findViewById(R.id.doorStatusText);
+                    doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
 
             }
         }
     };
 
+    public void lockScreen(){
+        startService(new Intent(this, LockScreenService.class));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,7 +190,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         mLayoutManager = new LinearLayoutManager(this);
@@ -179,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
         checkPermitions();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
+        startService(new Intent(String.valueOf(LockScreenService.class)));
     }
 
     public interface VolleyCallback{
@@ -231,10 +253,11 @@ public class MainActivity extends AppCompatActivity {
         timer.schedule(doAsynchronousTask, 0, 2000); //execute in every 50000 ms
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //No call for super(). Bug on API Level > 11.
 
-
-
-
+    }
 
     public static Context getContext() {
         return mContext;
@@ -273,7 +296,6 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
-            Log.e("Check Permissions","Checking Permissions");
             btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
             calendarManager.startTask();
             startService(new Intent(getBaseContext(), BluetoothConnection.class));
@@ -306,6 +328,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void makeFullScreen() {
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if(Build.VERSION.SDK_INT < 19) { //View.SYSTEM_UI_FLAG_IMMERSIVE is only on API 19+
+            this.getWindow().getDecorView()
+                    .setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        } else {
+            this.getWindow().getDecorView()
+                    .setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE);
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -324,9 +358,7 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.e("GOOOOOOOO", "FAILURE " + error);
                             if(!dialog.isShowing()){
-                                Log.e("gg","gogogo");
                                 if(!dialog.isShowing()){
                                     dialog.show();
                                 }
