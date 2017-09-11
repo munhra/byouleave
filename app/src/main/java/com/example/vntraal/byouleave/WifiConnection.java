@@ -35,7 +35,6 @@ import static com.example.vntraal.byouleave.BluetoothConnection.BROADCAST_ACTION
 
 public class WifiConnection extends Service {
 
-
     static WifiManager myWifiManager;
     Context myContex;
     WifiConfiguration myWifiConfiguration;
