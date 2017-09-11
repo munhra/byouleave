@@ -9,10 +9,13 @@ import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.AnimationDrawable;
+import android.media.Image;
 import android.media.Ringtone;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -23,13 +26,25 @@ import android.os.PowerManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,68 +123,36 @@ public class MainActivity extends AppCompatActivity {
 
                 default: doorAction.setText("Wifi Disabled");
             }
-
-     /*       switch (status) {
-                case "DOORSTATU":
-                    doorAction.setText(status);
-
-                    break;
-                case "STATUSBLE":
-                    switch(actionStatus.trim()){
-                        case "2":
-                            doorAction.setText("Bluetooth Connected");
-                            Toast.makeText(getContext(),"Bluetooth Connected", Toast.LENGTH_LONG).show();
-                            break;
-                        default: doorAction.setText("Bluetooth Disconnected");
-                            Toast.makeText(getContext(),"Trying to Reconnect", Toast.LENGTH_LONG).show();
-                            stopService(new Intent(getBaseContext(), BluetoothConnection.class));
-
-                            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if (!mBluetoothAdapter.isEnabled()) {
-                                mBluetoothAdapter.enable();
-                            }
-
-                            startService(new Intent(getBaseContext(), BluetoothConnection.class));
-                            break;
-                    }
-
-                    playNotificationSound();
-                    break;
-                case "OPENEDDOO":
-                    playNotificationSound();
-
-<<<<<<< HEAD
-                    doorAction.setText(actionStatus);
-
-                    //192.168.42.1:3000/api/sensor/?mac=5C:CF:7F:8F:6E:83&presence=1&ip=0.0.0.0&roomname="garage"
-
-                    switch (actionStatus.trim()){
-=======
-
-                    doorAction.setText(status);
-                    switch (status.trim()){
->>>>>>> TASK9-ReplaceBLEbyWIFI
-                        case "Switch CLOSED":
-                            ((EventAdapter) meuAdapter).resetData();
-                            Log.e("Action", "Door has been closed");
-                            fadeOut();
-                            break;
-                        case "Switch OPEN":
-                            ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
-                            ((EventAdapter) meuAdapter).setmData(lista);
-                            Log.e("Action", "Door has been opened");
-                            Unlock();
-                            break;
-                        default: doorAction.setText("Problems with the Message"); doorAction.setText("Problems with the Message"); break;
-                    }
-
-                    break;
-                default: doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
-
-            }*/
         }
     };
 
+    private final RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+            LinearLayoutManager layoutManager = ((LinearLayoutManager)recyclerView.getLayoutManager());
+            int pos = layoutManager.findLastCompletelyVisibleItemPosition();
+            int numItems = recyclerView.getAdapter().getItemCount();
+            ImageView arrowDownAnimation = (ImageView) findViewById(R.id.arrowDownAnimation);
+
+            if (pos >= numItems - 1) {
+                arrowDownAnimation.setVisibility(View.INVISIBLE);
+                arrowDownAnimation.setBackgroundResource(R.drawable.arrow_down_animation);
+                AnimationDrawable anim = (AnimationDrawable) arrowDownAnimation.getBackground();
+                anim.stop();
+            } else {
+                arrowDownAnimation.setVisibility(View.VISIBLE);
+                arrowDownAnimation.setBackgroundResource(R.drawable.arrow_down_animation);
+                AnimationDrawable anim = (AnimationDrawable) arrowDownAnimation.getBackground();
+                anim.start();
+            }
+        }
+    };
 
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     @Override
@@ -183,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         mLayoutManager = new LinearLayoutManager(this);
@@ -191,10 +173,87 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setAdapter(meuAdapter);
 
+        mRecyclerView.addOnScrollListener(mOnScrollListener);
+
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(), mRecyclerView,
+                new RecyclerItemListener.RecyclerTouchListener() {
+                    public void onClickItem(View v, int position) {
+
+                        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                        alert.setTitle(calendarManager.getCalendarRetults().get(position));
+                        alert.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                //Your action here
+                            }
+                        });
+                        alert.show();
+                    }
+
+                    public void onLongClickItem(View v, int position) {
+
+                    }
+        }));
+
         checkPermitions();
 
         registerReceiver(broadcastReceiver, new IntentFilter(WifiConnection.BROADCAST_ACTION));
     }
+
+    public interface VolleyCallback{
+        void onSuccess(String result);
+        void onErrorResponse(VolleyError error);
+    }
+
+    public void reconectionAsynchronousTask(final VolleyCallback callback) {
+
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            //ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                            //((EventAdapter) meuAdapter).setmData(lista);
+                            //Log.e("Assync", "Assync updated RecyclerView Adapter Data");
+
+                            // Instantiate the RequestQueue.
+                            RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                            String url ="http://192.168.42.1:3000/garage";
+
+                            // Request a string response from the provided URL.
+                            final StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                                    new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            callback.onSuccess(response);
+                                        }
+                                    }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    callback.onErrorResponse(error);
+                                }
+                            }) {
+                                @Override
+                                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                                    int mRequestCode = response.statusCode;
+                                    return super.parseNetworkResponse(response);
+                                }
+                            };
+
+                            queue.add(stringRequest);
+                          
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(doAsynchronousTask, 0, 2000); //execute in every 50000 ms
+    }
+
 
     public static Context getContext() {
         return mContext;
@@ -241,6 +300,26 @@ public class MainActivity extends AppCompatActivity {
             builder.setMessage("Trying to reconnect...").setTitle("Server not responding");
             dialog = builder.create();
             dialog.setCanceledOnTouchOutside(false);
+
+            reconectionAsynchronousTask(new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        if(dialog.isShowing()){
+                            dialog.dismiss();
+                            startService(new Intent(getBaseContext(), BluetoothConnection.class));
+                        }
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if(!dialog.isShowing()){
+                            dialog.show();
+                            stopService(new Intent(getBaseContext(), BluetoothConnection.class));
+                        }
+
+                    }
+            });
+
         }
     }
 
