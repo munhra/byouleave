@@ -87,6 +87,8 @@ public class BluetoothConnection extends Service {
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
         while (btAdapter != null && !btAdapter.isEnabled()) {
+            btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+            btAdapter = btManager.getAdapter();
             Log.v("BYouLeave","Adapter not ready");
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             //startActivityForResult(enableIntent,REQUEST_ENABLE_BT);

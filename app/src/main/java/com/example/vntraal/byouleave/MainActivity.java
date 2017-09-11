@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         calendarManager = CalendarManager.getInstance();
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         mLayoutManager = new LinearLayoutManager(this);
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         checkPermitions();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
-        startService(new Intent(String.valueOf(LockScreenService.class)));
+        //startService(new Intent(String.valueOf(LockScreenService.class)));
     }
 
     public interface VolleyCallback{
