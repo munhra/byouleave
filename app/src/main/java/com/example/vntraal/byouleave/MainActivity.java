@@ -62,12 +62,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static android.media.RingtoneManager.TYPE_NOTIFICATION;
 import static android.media.RingtoneManager.getDefaultUri;
 import static android.media.RingtoneManager.getRingtone;
@@ -419,12 +413,6 @@ public class MainActivity extends AppCompatActivity {
         Uri notification = getDefaultUri(TYPE_NOTIFICATION);
         Ringtone r = getRingtone(getApplicationContext(), notification);
         r.play();
-    }
-
-    public void fadeOut(){
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.screenBrightness = 0;
-        getWindow().setAttributes(params);
     }
 
     public void Unlock(){
