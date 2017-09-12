@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
             TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
 
             List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
+            Intent changeToDoorLockedView = new Intent(getContext(), LockedScreen.class);
             playNotificationSound();
             Log.e("status",status);
 
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case "Porta Aberta":
+                    finishActivity(0); //End CLocked Screen Activity
                     ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
                     ((EventAdapter) meuAdapter).setmData(lista);
                     playNotificationSound();
@@ -108,7 +110,8 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case "Porta Fechad":
-                    ((EventAdapter) meuAdapter).resetData();
+                    startActivityForResult(changeToDoorLockedView, 0);
+                    //((EventAdapter) meuAdapter).resetData();
                     playNotificationSound();
                     Log.e("Action", "Door has been closed");
                     doorAction.setText("Porta Fechada");
@@ -294,27 +297,11 @@ public class MainActivity extends AppCompatActivity {
             dialog = builder.create();
             dialog.setCanceledOnTouchOutside(false);
 
-            reconectionAsynchronousTask(new VolleyCallback() {
-                    @Override
-                    public void onSuccess(String result) {
-                        if(dialog.isShowing()){
-                            dialog.dismiss();
-                            startService(new Intent(getBaseContext(), BluetoothConnection.class));
-                        }
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if(!dialog.isShowing()){
-                            dialog.show();
-                            stopService(new Intent(getBaseContext(), BluetoothConnection.class));
-                        }
-
-                    }
-            });
 
         }
     }
+
+
 
     public void makeFullScreen() {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,

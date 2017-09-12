@@ -64,7 +64,7 @@ public class WifiConnection extends Service {
     public void onDestroy() {
         try {
             if(mySocket!=null)
-            mySocket.close();
+                mySocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,8 +124,8 @@ public class WifiConnection extends Service {
                         Log.e("ip",ipESP);
                     }
                     else{
-                    Toast.makeText(getApplicationContext(),"Erro ao obter Ip do ESP",Toast.LENGTH_SHORT).show();
-                   }
+                        Toast.makeText(getApplicationContext(),"Erro ao obter Ip do ESP",Toast.LENGTH_SHORT).show();
+                    }
                     connection.disconnect();
 
                     recieveMessages();
@@ -153,7 +153,7 @@ public class WifiConnection extends Service {
             if(mySocket.isConnected())
                 Log.e("h","Socket Conectado");
 
-          new ClientSide().start();
+            new ClientSide().start();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -169,13 +169,13 @@ public class WifiConnection extends Service {
             Log.e("pass","pasou");
             try {
                 while(true) {
-                mydataInputStream = new DataInputStream(mySocket.getInputStream());
-                mydataInputStream.read(buf);
-                String status = new String(buf);
-                Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
-                atualizarStatusBLE.putExtra("Status DOOR", status);
-                sendBroadcast(atualizarStatusBLE);
-                Log.e("pass",status);
+                    mydataInputStream = new DataInputStream(mySocket.getInputStream());
+                    mydataInputStream.read(buf);
+                    String status = new String(buf);
+                    Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
+                    atualizarStatusBLE.putExtra("Status DOOR", status);
+                    sendBroadcast(atualizarStatusBLE);
+                    Log.e("pass",status);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
