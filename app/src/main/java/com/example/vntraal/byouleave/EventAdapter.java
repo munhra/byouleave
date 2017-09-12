@@ -58,7 +58,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder>{
         mData = received;
         notifyDataSetChanged();
         for (String event : mData){
-            Log.e("Member name: ", event);
         }
 
     }
