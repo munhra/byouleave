@@ -104,7 +104,7 @@ public class BluetoothConnection extends Service {
 
             @Override
             public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-                Log.v("BYouLeave","Scan BLE callback ! "+device.getName());
+//                Log.v("BYouLeave","Scan BLE callback ! "+device.getName());
                 if ("TESTNAME".equals(device.getName())) {
                     Log.v("BYouLeave","FOUND HMSOFT ! "+device.getName());
                     btAdapter.stopLeScan(lesScanCallBack);
