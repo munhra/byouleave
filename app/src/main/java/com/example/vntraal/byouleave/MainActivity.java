@@ -19,6 +19,7 @@ import android.media.Image;
 import android.media.Ringtone;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -77,8 +78,9 @@ public class MainActivity extends AppCompatActivity {
 
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
     private CalendarManager calendarManager;
-    private AlertDialog.Builder builder;
-    private AlertDialog dialog;
+
+    AlertDialog.Builder builder;
+    AlertDialog dialog;
 
 
     private BroadcastReceiver lockScreenReceiver;
@@ -94,13 +96,30 @@ public class MainActivity extends AppCompatActivity {
             playNotificationSound();
             Log.e("status",status);
 
+            builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Server not responding");
+            builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    startService(new Intent(getBaseContext(), WifiConnection.class));
+                }
+            });
+            dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+
             switch (status){
                 case "Conectado000":
+                    Log.e("BroadcastAction","Received Connected to Wifi");
                     doorAction.setText("Wifi Connected");
+
+                    if(dialog.isShowing()){
+                        dialog.dismiss();
+                    }
+
                     break;
 
                 case "Porta Aberta":
-                    finishActivity(0); //End CLocked Screen Activity
+                    Log.e("BroadcastAction","Received Opened Door");
+                    finishActivity(0); //End Locked Screen Activity
                     ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
                     ((EventAdapter) meuAdapter).setmData(lista);
                     playNotificationSound();
@@ -110,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case "Porta Fechad":
+                    Log.e("BroadcastAction","Received Closed Door");
                     startActivityForResult(changeToDoorLockedView, 0);
                     //((EventAdapter) meuAdapter).resetData();
                     playNotificationSound();
@@ -118,7 +138,34 @@ public class MainActivity extends AppCompatActivity {
 
                     break;
 
-                default: doorAction.setText("Wifi Disabled");
+                case "RESTART00000":
+                    Log.e("BroadcastAction","Received Restart Wifi Service");
+                    doorAction.setText("Wifi Disabled");
+                    if(!dialog.isShowing()){
+                        dialog.show();
+                    }
+                    stopService(new Intent(getBaseContext(), WifiConnection.class));
+                    WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                    wifi.setWifiEnabled(true);
+
+
+                    break;
+
+                case "SERVERERROR0":
+                    Log.e("BroadcastAction","Received Server IP Error");
+                    dialog.setTitle("Problems on the IP Request");
+                    builder.create();
+                    if(!dialog.isShowing()){
+                        dialog.show();
+                    }
+                    stopService(new Intent(getBaseContext(), WifiConnection.class));
+
+                    break;
+
+                default:
+                    Log.e("BroadcastAction","Received Undefined Broadcast");
+                    doorAction.setText("???????");
+                    break;
             }
         }
     };
@@ -160,6 +207,14 @@ public class MainActivity extends AppCompatActivity {
         mSettings = getPreferences(Context.MODE_PRIVATE);
         mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         calendarManager = CalendarManager.getInstance();
+        View decorView = getWindow().getDecorView();
+        // Hide both the navigation bar and the status bar.
+        // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+        // a general rule, you should design your app to hide the status bar whenever you
+        // hide the navigation bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
@@ -291,13 +346,6 @@ public class MainActivity extends AppCompatActivity {
             calendarManager = CalendarManager.getInstance();
             calendarManager.startTask();
             startService(new Intent(getBaseContext(), WifiConnection.class));
-
-            builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Trying to reconnect...").setTitle("Server not responding");
-            dialog = builder.create();
-            dialog.setCanceledOnTouchOutside(false);
-
-
         }
     }
 
@@ -322,22 +370,6 @@ public class MainActivity extends AppCompatActivity {
             case PERMISSION_ACCESS_COARSE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     calendarManager.startTask();
-
-                    reconectionAsynchronousTask(new VolleyCallback() {
-                        @Override
-                        public void onSuccess(String result) {
-                            dialog.dismiss();
-                        }
-
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            if(!dialog.isShowing()){
-                                if(!dialog.isShowing()){
-                                    dialog.show();
-                                }
-                            }
-                        }
-                    });
 
                     startService(new Intent(getBaseContext(), WifiConnection.class));
 
