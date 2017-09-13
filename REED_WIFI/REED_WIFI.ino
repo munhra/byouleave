@@ -1,18 +1,25 @@
 
-#include <ESP8266WiFi.h>
+//#include <ESP8266WiFi.h>
+#include <ArduinoOTA.h>
+
+#define FOTA_HOST_NAME "FutureHouseGarageDoorESP"
 
 /*================VARIABLES==================*/
-/*const char* ssid     = "FollowMe-Pi3";
-const char* password = "FollowMeRadio";*/
-const char* ssid     = "Jonaphael ESP";
-const char* password = "esp8266esp";
+const char* ssid     = "FollowMe-Pi3";
+const char* password = "FollowMeRadio";
+/*const char* ssid     = "Jonaphael ESP";
+const char* password = "esp8266esp";*/
+
 const int httpPort = 3000;
-const char* host = "192.168.137.1";
+const char* host = "192.168.42.1";
+//const char* host = "192.168.137.1";
+
+
 int port = 12345;
 String roomName = "garage";
-WiFiServer server(12345);
-//HttpClient clienthttp;// = HttpClient(wifi, host, httpPort);
-WiFiClient client;
+
+WiFiServer server(12345); // With Esp
+WiFiClient client;// Esp
 const int REED_PIN = 2; // Pin connected to reed switch
 int state;
 /*===========================================*/
@@ -32,6 +39,7 @@ void setup() {
   WiFi.begin(ssid, password);
   wifiConection();
   sendRegister();
+  setUpFota();
 /*-------------------------------------------*/
   
 /*-------------------------------------------*/
@@ -54,7 +62,8 @@ else{
 /*=================VOID LOOP====================*/
 
 void loop() {
-delay(500);
+//delay(100);
+ArduinoOTA.handle();
   while((client.connected()) && (WiFi.status() == WL_CONNECTED)){
     // envia os dados reecebidos do REED
    // state = digitalRead(REED_PIN);
@@ -73,15 +82,14 @@ delay(500);
     delay(500);
   }
 
-      
+ if(WiFi.status() != WL_CONNECTED){
+    wifiConection();
+      sendRegister();
+  }
 
   if(!client.connected()){
     client.stop(); 
     acceptClient();
-  }
-  
-  if(WiFi.status() != WL_CONNECTED){
-    wifiConection();
   }
 }
 
@@ -186,7 +194,7 @@ void sendRegister()
     ESP.restart();
     return;
   }
-  String url = "/api/sensor/ip?ipDoor="+ipToString(WiFi.localIP());
+  String url = "/api/Door/ip?ipDoor="+ipToString(WiFi.localIP());
   Serial.print("Requesting URL: ");
   Serial.println(url);
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
@@ -196,3 +204,78 @@ void sendRegister()
   Serial.println(client.read());
   Serial.println("closing connection");
 }
+
+void setUpFota() {
+  ArduinoOTA.setHostname(FOTA_HOST_NAME);
+  ArduinoOTA.onStart([]() {
+    Serial.println("Start");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+  ArduinoOTA.begin();
+  Serial.println("Ready this one as uploaded by FOTA Sensor !!!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+/*void setUpFota(){
+  Serial.println("============================");
+  Serial.println(FOTA_HOST_NAME);
+  
+//  ArduinoOTA.setHostname(FOTA_HOST_NAME);
+//  
+//  ArduinoOTA.onStart([](){
+//    Serial.println("Starting FOTA");
+//  });
+//
+//  ArduinoOTA.onEnd([](){
+//    Serial.println("Ending FOTA");
+//  });
+//
+//  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total){
+//    Serial.printf("Progress: %u%%\r", (progress/ (total / 100)));
+//  });
+//
+//  ArduinoOTA.onError([](ota_error_t error){
+//    Serial.printf("Error[%u]",error);
+//    if(error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+//    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Error");
+//    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+//    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+//    else if (error == OTA_END_ERROR) Serial.println("End Failed"); 
+//  });
+
+  ArduinoOTA.setHostname(FOTA_HOST_NAME);
+  ArduinoOTA.onStart([]() {
+    Serial.println("Start");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+  ArduinoOTA.begin();
+  ArduinoOTA.begin();
+  Serial.println("============================");
+}*/
