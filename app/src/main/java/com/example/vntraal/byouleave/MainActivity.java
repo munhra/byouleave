@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
             dialog.setCanceledOnTouchOutside(false);
 
             switch (status){
-                case "Conectado000":
+                case "CONNECTED000":
                     Log.e("BroadcastAction","Received Connected to Wifi");
                     doorAction.setText("Wifi Connected");
 
@@ -117,24 +117,24 @@ public class MainActivity extends AppCompatActivity {
 
                     break;
 
-                case "Porta Aberta":
+                case "OPEN00000000":
                     Log.e("BroadcastAction","Received Opened Door");
                     finishActivity(0); //End Locked Screen Activity
                     ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
                     ((EventAdapter) meuAdapter).setmData(lista);
                     playNotificationSound();
                     Log.e("Action", "Door has been opened");
-                    doorAction.setText("Porta Aberta");
+                    doorAction.setText("Opened Door");
                     Unlock();
                     break;
 
-                case "Porta Fechad":
+                case "CLOSE0000000":
                     Log.e("BroadcastAction","Received Closed Door");
                     startActivityForResult(changeToDoorLockedView, 0);
                     //((EventAdapter) meuAdapter).resetData();
                     playNotificationSound();
                     Log.e("Action", "Door has been closed");
-                    doorAction.setText("Porta Fechada");
+                    doorAction.setText("Closed Door");
 
                     break;
 
