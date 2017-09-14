@@ -3,12 +3,8 @@ package com.example.vntraal.byouleave;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManager;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -23,20 +19,17 @@ import android.media.Image;
 import android.media.Ringtone;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.support.annotation.IdRes;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -45,14 +38,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -62,15 +47,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.media.RingtoneManager.TYPE_NOTIFICATION;
 import static android.media.RingtoneManager.getDefaultUri;
 import static android.media.RingtoneManager.getRingtone;
+import static com.google.api.client.http.HttpMethods.HEAD;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,12 +64,12 @@ public class MainActivity extends AppCompatActivity {
     private static Activity mActivity;
     private static SharedPreferences mSettings;
     private static ConnectivityManager mConnMgr;
-    private BluetoothManager btManager;
-    private final static int REQUEST_ENABLE_BT = 1;
-    private BluetoothAdapter.LeScanCallback lesScanCallBack;
-    private BluetoothAdapter btAdapter;
-    private BluetoothGattCallback btleGattCallback;
-    private BluetoothGatt bluetoothGatt;
+  //  private BluetoothManager btManager;
+ //   private final static int REQUEST_ENABLE_BT = 1;
+ //   private BluetoothAdapter.LeScanCallback lesScanCallBack;
+ //   private BluetoothAdapter btAdapter;
+//    private BluetoothGattCallback btleGattCallback;
+//    private BluetoothGatt bluetoothGatt;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter meuAdapter = new EventAdapter();
     private RecyclerView.LayoutManager mLayoutManager;
@@ -92,88 +78,94 @@ public class MainActivity extends AppCompatActivity {
 
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
     private CalendarManager calendarManager;
-    private AlertDialog.Builder builder;
-    private AlertDialog dialog;
+
+    AlertDialog.Builder builder;
+    AlertDialog dialog;
 
 
     private BroadcastReceiver lockScreenReceiver;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //TextView statusBLE = (TextView) findViewById(R.id.BluetoothStatus);
 
-
-            String actionName = intent.getStringExtra("Status BLE").substring(0,9);
-            String actionStatus = intent.getStringExtra("Status BLE").substring(11);
+            String status = intent.getStringExtra("Status DOOR").substring(0,12);
+            TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
 
             List<String> calendarResult = new ArrayList<String>(calendarManager.getCalendarRetults());
+            Intent changeToDoorLockedView = new Intent(getContext(), LockedScreen.class);
+            playNotificationSound();
+            Log.e("status",status);
 
-            switch (actionName) {
-                case "DOORSTATU":
-                    TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
-                    doorAction.setText(actionStatus);
+            builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Server not responding");
+            builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    startService(new Intent(getBaseContext(), WifiConnection.class));
+                }
+            });
+            dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
 
-                    break;
-                case "STATUSBLE":
-                    switch(actionStatus.trim()){
-                        case "2":
-                            doorAction = (TextView) findViewById(R.id.doorStatusText);
-                            doorAction.setText("Bluetooth Connected");
-                            Toast.makeText(getContext(),"Bluetooth Connected", Toast.LENGTH_LONG).show();
-                            break;
-                        default:
-                            doorAction = (TextView) findViewById(R.id.doorStatusText);
-                            doorAction.setText("Bluetooth Disconnected");
-                            Toast.makeText(getContext(),"Trying to Reconnect", Toast.LENGTH_LONG).show();
-                            stopService(new Intent(getBaseContext(), BluetoothConnection.class));
+            switch (status){
+                case "CONNECTED000":
+                    Log.e("BroadcastAction","Received Connected to Wifi");
+                    doorAction.setText("Wifi Connected");
 
-                            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if (!mBluetoothAdapter.isEnabled()) {
-                                mBluetoothAdapter.enable();
-                            }
-
-                            startService(new Intent(getBaseContext(), BluetoothConnection.class));
-                            break;
-                    }
-
-                    playNotificationSound();
-                    break;
-                case "OPENEDDOO":
-                    playNotificationSound();
-
-                    //192.168.42.1:3000/api/sensor/?mac=5C:CF:7F:8F:6E:83&presence=1&ip=0.0.0.0&roomname="garage"
-                    //final ViewGroup viewGroup = (ViewGroup) findViewById(R.id.mainLayout);
-                    //viewGroup.removeAllViews();
-                    //viewGroup.setPadding(0, 0, 0, 0);
-                    Intent changeToDoorLockedView = new Intent(getContext(), LockedScreen.class);
-                    Intent changeToDoorOpenedView = new Intent(getContext(), MainActivity.class);
-
-                    switch (actionStatus.trim()){
-                        case "Switch CLOSED":
-                            startActivityForResult(changeToDoorLockedView, 0);
-                            break;
-                        case "Switch OPEN":
-                            finishActivity(0);
-
-                            doorAction = (TextView) findViewById(R.id.doorStatusText);
-                            doorAction.setText(actionStatus);
-
-                            ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
-                            ((EventAdapter) meuAdapter).setmData(lista);
-                            for(String event : lista){Log.e("X", event);}
-                            Log.e("Go", "Jussssst Go!");
-
-                            break;
-                        default:
-                            doorAction = (TextView) findViewById(R.id.doorStatusText);
-                            doorAction.setText("Problems with the Message"); doorAction.setText("Problems with the Message"); break;
+                    if(dialog.isShowing()){
+                        dialog.dismiss();
                     }
 
                     break;
+
+                case "OPEN00000000":
+                    Log.e("BroadcastAction","Received Opened Door");
+                    finishActivity(0); //End Locked Screen Activity
+                    ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                    ((EventAdapter) meuAdapter).setmData(lista);
+                    playNotificationSound();
+                    Log.e("Action", "Door has been opened");
+                    doorAction.setText("Opened Door");
+                    Unlock();
+                    break;
+
+                case "CLOSE0000000":
+                    Log.e("BroadcastAction","Received Closed Door");
+                    startActivityForResult(changeToDoorLockedView, 0);
+                    //((EventAdapter) meuAdapter).resetData();
+                    playNotificationSound();
+                    Log.e("Action", "Door has been closed");
+                    doorAction.setText("Closed Door");
+
+                    break;
+
+                case "RESTART00000":
+                    Log.e("BroadcastAction","Received Restart Wifi Service");
+                    doorAction.setText("Wifi Disabled");
+                    if(!dialog.isShowing()){
+                        dialog.show();
+                    }
+                    stopService(new Intent(getBaseContext(), WifiConnection.class));
+                    WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                    wifi.setWifiEnabled(true);
+
+
+                    break;
+
+                case "SERVERERROR0":
+                    Log.e("BroadcastAction","Received Server IP Error");
+                    dialog.setTitle("Problems on the IP Request");
+                    builder.create();
+                    if(!dialog.isShowing()){
+                        dialog.show();
+                    }
+                    stopService(new Intent(getBaseContext(), WifiConnection.class));
+
+                    break;
+
                 default:
-                    doorAction = (TextView) findViewById(R.id.doorStatusText);
-                    doorAction.setText("Problems with the Header"); doorAction.setText("Problems with the Header"); break;
-
+                    Log.e("BroadcastAction","Received Undefined Broadcast");
+                    doorAction.setText("???????");
+                    break;
             }
         }
     };
@@ -206,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -214,6 +207,14 @@ public class MainActivity extends AppCompatActivity {
         mSettings = getPreferences(Context.MODE_PRIVATE);
         mConnMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         calendarManager = CalendarManager.getInstance();
+        View decorView = getWindow().getDecorView();
+        // Hide both the navigation bar and the status bar.
+        // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+        // a general rule, you should design your app to hide the status bar whenever you
+        // hide the navigation bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
@@ -247,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
 
         checkPermitions();
 
-        registerReceiver(broadcastReceiver, new IntentFilter(BluetoothConnection.BROADCAST_ACTION));
+        registerReceiver(broadcastReceiver, new IntentFilter(WifiConnection.BROADCAST_ACTION));
     }
 
     public interface VolleyCallback{
@@ -342,35 +343,13 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
-            btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+            calendarManager = CalendarManager.getInstance();
             calendarManager.startTask();
-            startService(new Intent(getBaseContext(), BluetoothConnection.class));
-
-            builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Trying to reconnect...").setTitle("Server not responding");
-            dialog = builder.create();
-            dialog.setCanceledOnTouchOutside(false);
-
-            reconectionAsynchronousTask(new VolleyCallback() {
-                    @Override
-                    public void onSuccess(String result) {
-                        if(dialog.isShowing()){
-                            dialog.dismiss();
-                            startService(new Intent(getBaseContext(), BluetoothConnection.class));
-                        }
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if(!dialog.isShowing()){
-                            dialog.show();
-                            stopService(new Intent(getBaseContext(), BluetoothConnection.class));
-                        }
-
-                    }
-            });
+            startService(new Intent(getBaseContext(), WifiConnection.class));
         }
     }
+
+
 
     public void makeFullScreen() {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -390,25 +369,10 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSION_ACCESS_COARSE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
                     calendarManager.startTask();
-                    startService(new Intent(getBaseContext(), BluetoothConnection.class));
 
-                    reconectionAsynchronousTask(new VolleyCallback() {
-                        @Override
-                        public void onSuccess(String result) {
-                            dialog.dismiss();
-                        }
+                    startService(new Intent(getBaseContext(), WifiConnection.class));
 
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            if(!dialog.isShowing()){
-                                if(!dialog.isShowing()){
-                                    dialog.show();
-                                }
-                            }
-                        }
-                    });
                 }
 
                 break;
@@ -419,12 +383,6 @@ public class MainActivity extends AppCompatActivity {
         Uri notification = getDefaultUri(TYPE_NOTIFICATION);
         Ringtone r = getRingtone(getApplicationContext(), notification);
         r.play();
-    }
-
-    public void fadeOut(){
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.screenBrightness = 0;
-        getWindow().setAttributes(params);
     }
 
     public void Unlock(){
