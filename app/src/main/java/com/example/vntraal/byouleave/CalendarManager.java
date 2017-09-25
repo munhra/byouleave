@@ -445,6 +445,7 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
         protected void onPostExecute(List<String> output) {
 //            mProgress.hide();
             if (output == null || output.size() == 0) {
+                mCalendarResults.clear();
                 mCalendarResults.add(0, "No results returned.");
 //                mOutputText.setText("No results returned.");
             } else {
