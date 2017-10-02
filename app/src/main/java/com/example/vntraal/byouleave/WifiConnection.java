@@ -9,6 +9,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.provider.Settings;
@@ -98,7 +99,6 @@ public class WifiConnection extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "Searching and Connect to Wifi", Toast.LENGTH_SHORT).show();
         return START_NOT_STICKY;
     }
 
@@ -106,13 +106,20 @@ public class WifiConnection extends Service {
         Log.e("Service State", "Entering in WifiACTIVITY");
         myWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if(myWifiManager != null && !myWifiManager.isWifiEnabled()) {
+
             Log.e("BYouLeave","Wifi not ready, enabling");
             WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
             wifi.setWifiEnabled(true);
 
-            Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
-            atualizarStatusBLE.putExtra("Status DOOR", "RESTART00000");
-            sendBroadcast(atualizarStatusBLE);
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
+                    atualizarStatusBLE.putExtra("Status DOOR", "RESTART00000");
+                    sendBroadcast(atualizarStatusBLE);
+                }
+            }, 5000);
         }
         else{
             Log.e("BYouLeave","Adapter ready enable button");
@@ -129,6 +136,11 @@ public class WifiConnection extends Service {
                     Log.e("Mesage Request",connection.getResponseCode()+"");
 
                     if (connection.getResponseCode() == 200 ) {
+
+                        Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
+                        atualizarStatusBLE.putExtra("Status DOOR", "CONNECTED000");
+                        sendBroadcast(atualizarStatusBLE);
+
                         BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                         StringBuilder sb = new StringBuilder();
                         String line;
@@ -196,13 +208,25 @@ public class WifiConnection extends Service {
                     Log.e("pass",status);
                 }
                 Log.e("Sckt", "Socket has been disconnected");
+                mydataInputStream.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
                 Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
                 atualizarStatusBLE.putExtra("Status DOOR", "Wifi Nao Conectado");
                 sendBroadcast(atualizarStatusBLE);
                 Log.e("Service State", "Wifi Não Conectado");
+
+                try {
+                    mydataInputStream.close();
+                    mySocket.close();
+                    Log.e("ScreenSTS","Socket has been closed, along with the InputStream");
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
                 onDestroy();
+
             } catch(Exception exc){
                 Log.e("General Exception", exc.getMessage());
             }
