@@ -115,7 +115,7 @@ void sendRegister()
     return;
   }
   String url = "/api/Door/ip?ipDoor="+ipToString(WiFi.localIP());
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" +
+  client.write(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
   client.flush();
