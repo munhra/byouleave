@@ -36,6 +36,9 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+
+import java.text.ParseException;
+import java.util.Calendar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -43,9 +46,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -404,18 +411,38 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
          * @return List of Strings describing returned events.
          * @throws IOException
          */
-        private List<String> getDataFromApi() throws IOException {
+
+
+        private List<String> getDataFromApi() throws IOException, ParseException {
             // List the next 10 events from the primary calendar.
+            Log.e("Time", "Getting the time");
             DateTime now = new DateTime(System.currentTimeMillis());
-            DateTime endOfDay = new DateTime((System.currentTimeMillis() + 1000000) + (System.currentTimeMillis()%86400000));
+            //DateTime endOfDay = new DateTime((System.currentTimeMillis() + 1000000) + (System.currentTimeMillis()%86400000));
 
             /*""", ">>>>>>>>> NOW: " + now);
             """, ">>>>>>>>> ENTIRE: " + endOfDay);*/
 
+            Calendar calendar = Calendar.getInstance();
+
+            String thisYear = "" + calendar.get(Calendar.YEAR);
+            Log.e("Year", "# thisYear : " + thisYear);
+
+            String thisMonth = "" + (calendar.get(Calendar.MONTH) + 1);
+            Log.e("Month", "@ thisMonth : " + thisMonth);
+
+            String nextDay = "" + (calendar.get(Calendar.DATE) + 1);
+            if(nextDay.length() == 1){
+                nextDay = "0" + nextDay;
+            }
+            Log.e("Day", "$ thisDay : " + nextDay);
+
+            Log.e("Sps",thisYear + "-" + thisMonth + "-" + nextDay + "T03:00:00Z");
+            Log.e("Sps","2017-10-07T03:00:00Z");
+
             List<String> eventStrings = new ArrayList<String>();
             Events events = mService.events().list("primary")
                     .setTimeMin(now)
-                    .setTimeMax(endOfDay)
+                    .setTimeMax(new DateTime(thisYear + "-" + thisMonth + "-" + nextDay + "T03:00:00Z")) //GMT Brasília -3 ex:"2017-10-07T03:00:00Z"
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute();
