@@ -41,7 +41,7 @@ void setup()
 void loop()
 {
   int proximity = digitalRead(REED_PIN); // Read the state of the switch
-  sendDebug();
+  //sendDebug();
   if (proximity == LOW) // If the pin reads low, the switch is closed.
   {
     if (sendClosedBLEInfo) {
