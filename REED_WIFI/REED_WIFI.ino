@@ -40,7 +40,7 @@ void loop() {
    ArduinoOTA.handle();
     doorStatus();
 
- if(WiFi.status() != WL_CONNECTED){
+ if(WiFi.status() == WL_DISCONNECTED){
     setupWifi();
       sendRegister();
   }
@@ -51,8 +51,6 @@ void loop() {
   }
 
   delay(defautDelay);
-  //Alive signal
-  client.write("HUZZAH ON000");
 }
 
 // Accept new Client
@@ -67,16 +65,17 @@ while(!server.hasClient()){
   Serial.println("New Client");
   client = server.available();
   doorStatus();
-  client.write("CONNECTED000");
-  delay(oneSecondDelay);
+  client.print("CONNECTED000");
+  client.flush();
+  delay(twoSecondDelay);
 
 // send to the Client the door Status
   if(state==-1){
-    client.write("CLOSE0000000");
+    client.print("CLOSE0000000");
     client.flush();
   }
   else{  
-    client.write("OPEN00000000");
+    client.print("OPEN00000000");
     client.flush();
   }
   delay(twoSecondDelay);
@@ -115,7 +114,7 @@ void sendRegister()
     return;
   }
   String url = "/api/Door/ip?ipDoor="+ipToString(WiFi.localIP());
-  client.write(String("POST ") + url + " HTTP/1.1\r\n" +
+  client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
   client.flush();
@@ -184,7 +183,7 @@ void setUpFota() {
 void doorStatus(){
   if((digitalRead(REED_PIN)==LOW) && (state == 1)) {
     if(client.connected()){
-      client.write("CLOSE0000000");
+      client.print("CLOSE0000000");
       client.flush();
     }
      sendDetectionPost("0"); 
@@ -193,7 +192,7 @@ void doorStatus(){
   
   if((digitalRead(REED_PIN)==HIGH) && (state == -1)){
     if(client.connected()){
-      client.write("OPEN00000000");
+      client.print("OPEN00000000");
       client.flush();
     }
     sendDetectionPost("1"); 
