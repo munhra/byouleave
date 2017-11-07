@@ -430,18 +430,31 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
             String thisMonth = "" + (calendar.get(Calendar.MONTH) + 1);
             Log.e("Month", "@ thisMonth : " + thisMonth);
 
+            String today = "" + (calendar.get(Calendar.DATE));
+            if(today.length() == 1){
+                today = "0" + today;
+            }
+            Log.e("Day", "$ today : " + today);
+
+            String timeNow = "" + (calendar.get(Calendar.HOUR_OF_DAY));
+            if(timeNow.length() == 1){
+                timeNow = "0" + timeNow;
+            }
+            Log.e("Day", "$ time now : " + timeNow);
+
             String nextDay = "" + (calendar.get(Calendar.DATE) + 1);
             if(nextDay.length() == 1){
                 nextDay = "0" + nextDay;
             }
-            Log.e("Day", "$ thisDay : " + nextDay);
+            Log.e("Day", "$ nextDay : " + nextDay);
 
+            Log.e("Sps",thisYear + "-" + thisMonth + "-" + today + "T" + timeNow + ":00:00Z");
             Log.e("Sps",thisYear + "-" + thisMonth + "-" + nextDay + "T03:00:00Z");
-            Log.e("Sps","2017-10-07T03:00:00Z");
+            //Log.e("Sps","2017-10-07T03:00:00Z");
 
             List<String> eventStrings = new ArrayList<String>();
             Events events = mService.events().list("primary")
-                    .setTimeMin(now)
+                    .setTimeMin(new DateTime(thisYear + "-" + thisMonth + "-" + today + "T" + timeNow + ":00:00Z"))
                     .setTimeMax(new DateTime(thisYear + "-" + thisMonth + "-" + nextDay + "T03:00:00Z")) //GMT Brasília -3 ex:"2017-10-07T03:00:00Z"
                     .setOrderBy("startTime")
                     .setSingleEvents(true)

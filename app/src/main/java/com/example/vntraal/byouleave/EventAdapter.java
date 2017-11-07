@@ -30,26 +30,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder>{
     public static class ViewHolder extends RecyclerView.ViewHolder{
         public View eventView;
         public TextView appointment;
-        public ImageView arrowAnimation;
 
         public ViewHolder(View v){
             super(v);
             eventView = v;
-            appointment = (TextView) v.findViewById(R.id.event);
-
-            final Handler handler = new Handler();
-            Random r = new Random();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Do something after 5s = 5000ms
-                    arrowAnimation = (ImageView) eventView.findViewById(R.id.arrowAnimation);
-                    arrowAnimation.setBackgroundResource(R.drawable.arrow_animation);
-                    AnimationDrawable anim = (AnimationDrawable) arrowAnimation.getBackground();
-                    anim.start();
-                }
-            }, r.nextInt(1000 - 0));
-
+            appointment = (TextView) v.findViewById(R.id.eventName);
         }
 
     }
@@ -57,9 +42,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder>{
     public void setmData(ArrayList<String> received){
         mData = received;
         notifyDataSetChanged();
-        for (String event : mData){
-        }
-
     }
 
     public void resetData(){
@@ -70,7 +52,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder>{
     @Override
     public EventAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycler_item, parent, false);
+                .inflate(R.layout.updated_recycler_item, parent, false);
 
         ViewHolder vh = new ViewHolder(v);
 

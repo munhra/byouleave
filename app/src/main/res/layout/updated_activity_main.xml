@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DBDBDB">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:background="#0D489B"
+        android:elevation="15dp"
+        android:id="@+id/rlHeader">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/menux15"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="30dp"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/logox15"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/buscax15"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="30dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="1dp"
+        android:layout_below="@+id/rlHeader"
+        android:layout_marginLeft="200dp"
+        android:layout_marginRight="200dp"
+        android:id="@+id/weekInfo">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&lt;"
+            android:id="@+id/pastWeek"
+            android:layout_centerVertical="true"
+            android:textColor="#2FC5F9"
+            android:textSize="35sp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&gt;"
+            android:layout_toRightOf="@+id/pastWeek"
+            android:layout_marginLeft="60dp"
+            android:id="@+id/nextWeek"
+            android:layout_centerVertical="true"
+            android:textColor="#2FC5F9"
+            android:textSize="35sp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Today, 27 October"
+            android:layout_toRightOf="@+id/nextWeek"
+            android:layout_marginLeft="40dp"
+            android:layout_centerVertical="true"
+            android:textColor="#2FC5F9"
+            android:textSize="35sp"
+            android:id="@+id/doorStatusText"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/addx15"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/weekInfo"
+        android:gravity="center"
+        android:id="@+id/daysOfTheWeek">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingLeft="5dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="80dp"
+            android:paddingTop="5dp"
+            android:id="@+id/sunday">
+
+            <TextView
+                android:id="@+id/weekDaySunday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dom"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="22"
+                android:textSize="40sp"
+                android:layout_below="@+id/weekDaySunday"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingLeft="5dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="80dp"
+            android:paddingTop="5dp"
+            android:id="@+id/monday"
+            android:layout_toRightOf="@id/sunday"
+            android:layout_marginLeft="2dp">
+
+            <TextView
+                android:id="@+id/weekDayMonday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Seg"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="23"
+                android:textSize="40sp"
+                android:layout_below="@+id/weekDayMonday"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingLeft="5dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="80dp"
+            android:paddingTop="5dp"
+            android:id="@+id/tuesday"
+            android:layout_toRightOf="@id/monday"
+            android:layout_marginLeft="2dp">
+
+            <TextView
+                android:id="@+id/weekDayTuesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ter"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="24"
+                android:textSize="40sp"
+                android:layout_below="@+id/weekDayTuesday"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingLeft="5dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="80dp"
+            android:paddingTop="5dp"
+            android:id="@+id/wednesday"
+            android:layout_toRightOf="@id/tuesday"
+            android:layout_marginLeft="2dp">
+
+            <TextView
+                android:id="@+id/weekDayWednesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Qua"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25"
+                android:textSize="40sp"
+                android:layout_below="@+id/weekDayWednesday"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingLeft="5dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="80dp"
+            android:paddingTop="5dp"
+            android:id="@+id/thursday"
+            android:layout_toRightOf="@id/wednesday"
+            android:layout_marginLeft="2dp">
+
+            <TextView
+                android:id="@+id/weekDayThursday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Qui"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="26"
+                android:textSize="40sp"
+                android:layout_below="@+id/weekDayThursday"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingLeft="5dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="80dp"
+            android:paddingTop="5dp"
+            android:id="@+id/friday"
+            android:layout_toRightOf="@id/thursday"
+            android:layout_marginLeft="2dp">
+
+            <TextView
+                android:id="@+id/weekDayFriday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sex"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="27"
+                android:textSize="40sp"
+                android:layout_below="@+id/weekDayFriday"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingLeft="5dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="80dp"
+            android:paddingTop="5dp"
+            android:id="@+id/saturday"
+            android:layout_toRightOf="@id/friday"
+            android:layout_marginLeft="2dp">
+
+            <TextView
+                android:id="@+id/weekDaySaturday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sab"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="28"
+                android:textSize="40sp"
+                android:layout_below="@+id/weekDaySaturday"
+                />
+
+        </RelativeLayout>
+
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_below="@+id/daysOfTheWeek"
+        android:paddingLeft="200dp"
+        android:paddingRight="200dp"
+        android:paddingTop="10dp">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:scrollbars="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>

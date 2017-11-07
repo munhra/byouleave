@@ -51,7 +51,7 @@ public class WifiConnection extends Service {
     private static String netWorkPass="FollowMeRadio";
 
     private Socket mySocket;
-    private String ipServer = "192.168.42.1";
+    private String ipServer = "192.168.42.2";
     private  int portServer = 3000;
     private String ipESP = "";
     private  int portEsp = 12345;
@@ -180,6 +180,7 @@ public class WifiConnection extends Service {
     private void recieveMessages() throws IOException {
         try {
             mySocket = new Socket(ipESP,portEsp);
+            mySocket.setTcpNoDelay(true);
 
             Log.e("e","Conectado");
 
@@ -199,13 +200,16 @@ public class WifiConnection extends Service {
             Log.e("pass","pasou");
             try {
                 while(mySocket.isConnected()) {
+                    Log.e("SocketState","Socket is running");
                     mydataInputStream = new DataInputStream(mySocket.getInputStream());
                     mydataInputStream.read(buf);
                     String status = new String(buf);
                     Intent atualizarStatusBLE = new Intent(BROADCAST_ACTION);
-                    atualizarStatusBLE.putExtra("Status DOOR", status);
+                    atualizarStatusBLE.putExtra("Status DOOR", status.substring(0,12));
                     sendBroadcast(atualizarStatusBLE);
+
                     Log.e("pass",status);
+                    //mydataInputStream.close();
                 }
                 Log.e("Sckt", "Socket has been disconnected");
                 mydataInputStream.close();

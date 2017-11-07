@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="100dp"
+    android:background="#FFFFFF">
+
+    <RelativeLayout
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:background="#5FDDFF"
+        android:gravity="center"
+        android:padding="10dp"
+        android:id="@+id/timeheader">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="18:00"
+            android:textColor="#FFFFFF"
+            android:layout_centerInParent="true"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/timeheader"
+        android:id="@+id/eventInfo"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/eventOptions">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#5FDDFF"
+            android:text="Mercado"
+            android:paddingLeft="20dp"
+            android:paddingBottom="1dp"
+            android:id="@+id/eventName"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/eventName"
+            android:text="Comprar coisas para o churrasco"
+            android:paddingLeft="20dp"/>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layout_alignParentRight="true"
+        android:id="@+id/eventOptions"
+        android:paddingRight="5dp">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/eventCheckbox"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/opcaox15"
+            android:layout_toRightOf="@id/eventCheckbox"
+            />
+
+
+    </RelativeLayout>
+
+</RelativeLayout>
