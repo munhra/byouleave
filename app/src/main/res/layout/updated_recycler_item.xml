@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="890dp"
+    android:orientation="vertical" android:layout_width="875dp"
     android:layout_height="100dp"
     android:background="#FFFFFF">
 
@@ -48,7 +48,6 @@
             android:paddingLeft="20dp"
             android:id="@+id/description"/>
 
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -77,5 +76,14 @@
 
 
     </RelativeLayout>
+
+    <TextView
+        android:layout_width="600dp"
+        android:layout_height="1dp"
+        android:background="#E6E6E6"
+        android:paddingRight="-150dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/hr"/>
 
 </RelativeLayout>

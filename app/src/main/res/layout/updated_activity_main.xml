@@ -94,7 +94,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/weekInfo"
         android:gravity="center"
-        android:id="@+id/daysOfTheWeek">
+        android:layout_centerHorizontal="true"
+        android:id="@+id/daysOfTheWeek"
+        android:elevation="5dp">
 
         <RelativeLayout
             android:layout_width="125dp"
@@ -104,7 +106,7 @@
             android:paddingBottom="10dp"
             android:paddingTop="5dp"
             android:id="@+id/sunday"
-            android:elevation="2dp">
+            >
 
             <TextView
                 android:id="@+id/weekDaySunday"
@@ -132,8 +134,7 @@
             android:paddingTop="5dp"
             android:id="@+id/monday"
             android:layout_toRightOf="@id/sunday"
-            android:layout_marginLeft="2dp"
-            android:elevation="2dp">
+            >
 
             <TextView
                 android:id="@+id/weekDayMonday"
@@ -161,8 +162,7 @@
             android:paddingTop="5dp"
             android:id="@+id/tuesday"
             android:layout_toRightOf="@id/monday"
-            android:layout_marginLeft="2dp"
-            android:elevation="2dp">
+            >
 
             <TextView
                 android:id="@+id/weekDayTuesday"
@@ -190,8 +190,7 @@
             android:paddingTop="5dp"
             android:id="@+id/wednesday"
             android:layout_toRightOf="@id/tuesday"
-            android:layout_marginLeft="2dp"
-            android:elevation="2dp">
+            >
 
             <TextView
                 android:id="@+id/weekDayWednesday"
@@ -219,8 +218,7 @@
             android:paddingTop="5dp"
             android:id="@+id/thursday"
             android:layout_toRightOf="@id/wednesday"
-            android:layout_marginLeft="2dp"
-            android:elevation="2dp">
+            >
 
             <TextView
                 android:id="@+id/weekDayThursday"
@@ -248,8 +246,7 @@
             android:paddingTop="5dp"
             android:id="@+id/friday"
             android:layout_toRightOf="@id/thursday"
-            android:layout_marginLeft="2dp"
-            android:elevation="2dp">
+            >
 
             <TextView
                 android:id="@+id/weekDayFriday"
@@ -277,8 +274,7 @@
             android:paddingTop="5dp"
             android:id="@+id/saturday"
             android:layout_toRightOf="@id/friday"
-            android:layout_marginLeft="2dp"
-            android:elevation="2dp">
+            >
 
             <TextView
                 android:id="@+id/weekDaySaturday"
@@ -306,7 +302,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginLeft="195dp"
+        android:layout_centerHorizontal="true"
         android:layout_below="@+id/daysOfTheWeek"
         android:paddingTop="10dp">
 
