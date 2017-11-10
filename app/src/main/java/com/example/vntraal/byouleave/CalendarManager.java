@@ -10,6 +10,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.ExponentialBackOff;
 
 import com.google.api.services.calendar.CalendarScopes;
@@ -37,6 +38,7 @@ import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.util.Calendar;
 import android.view.View;
@@ -52,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -99,7 +103,123 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
         stopRepeatingTask();
     }
 
+    public String getMonthForInt(int num) {
+        String month = "wrong";
+        DateFormatSymbols dfs = new DateFormatSymbols();
+        String[] months = dfs.getMonths();
+        if (num >= 0 && num <= 11 ) {
+            month = months[num];
+        }
+        return month;
+    }
+
+    public ArrayMap<String, String> getWeekDays(){
+        Calendar calendar = Calendar.getInstance();
+
+        SimpleDateFormat dayFormat = new SimpleDateFormat("E", Locale.US);
+        String weekDay = dayFormat.format(calendar.getTime());
+
+        String today = "" + (calendar.get(Calendar.DATE));
+
+        if(today.length() == 1){
+            today = "0" + today;
+        }
+
+        Log.e("KIDDO", calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
+
+        String actualmonth = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
+
+
+        Log.e("Testing WeekDay",weekDay);
+
+        ArrayMap<String,String> dias = new ArrayMap<>();
+        dias.add("today",today);
+        dias.add("month",actualmonth);
+        dias.add("weekday",weekDay);
+
+        switch(weekDay){
+            case "Mon":
+                dias.add("Mon",today);
+                dias.add("Tue",((calendar.get(Calendar.DATE) + 1) + ""));
+                dias.add("Wed",((calendar.get(Calendar.DATE) + 2) + ""));
+                dias.add("Thu",((calendar.get(Calendar.DATE) + 3) + ""));
+                dias.add("Fri",((calendar.get(Calendar.DATE) + 4) + ""));
+                dias.add("Sat",((calendar.get(Calendar.DATE) + 5) + ""));
+                dias.add("Sun",((calendar.get(Calendar.DATE) + 6) + ""));
+                break;
+
+            case "Tue":
+                dias.add("Mon",((calendar.get(Calendar.DATE) -1) + ""));
+                dias.add("Tue",today);
+                dias.add("Wed",((calendar.get(Calendar.DATE) + 1) + ""));
+                dias.add("Thu",((calendar.get(Calendar.DATE) + 2) + ""));
+                dias.add("Fri",((calendar.get(Calendar.DATE) + 3) + ""));
+                dias.add("Sat",((calendar.get(Calendar.DATE) + 4) + ""));
+                dias.add("Sun",((calendar.get(Calendar.DATE) + 5) + ""));
+                break;
+
+            case "Wed":
+                dias.add("Mon",((calendar.get(Calendar.DATE) -2) + ""));
+                dias.add("Tue",((calendar.get(Calendar.DATE) -1) + ""));
+                dias.add("Wed",today);
+                dias.add("Thu",((calendar.get(Calendar.DATE) + 1) + ""));
+                dias.add("Fri",((calendar.get(Calendar.DATE) + 2) + ""));
+                dias.add("Sat",((calendar.get(Calendar.DATE) + 3) + ""));
+                dias.add("Sun",((calendar.get(Calendar.DATE) + 4) + ""));
+                break;
+
+            case "Thu":
+                dias.add("Mon",((calendar.get(Calendar.DATE) -3) + ""));
+                dias.add("Tue",((calendar.get(Calendar.DATE) -2) + ""));
+                dias.add("Wed",((calendar.get(Calendar.DATE) -1) + ""));
+                dias.add("Thu",today);
+                dias.add("Fri",((calendar.get(Calendar.DATE) + 1) + ""));
+                dias.add("Sat",((calendar.get(Calendar.DATE) + 2) + ""));
+                dias.add("Sun",((calendar.get(Calendar.DATE) + 3) + ""));
+                break;
+
+            case "Fri":
+                dias.add("Mon",((calendar.get(Calendar.DATE) -4) + ""));
+                dias.add("Tue",((calendar.get(Calendar.DATE) -3) + ""));
+                dias.add("Wed",((calendar.get(Calendar.DATE) -2) + ""));
+                dias.add("Thu",((calendar.get(Calendar.DATE) -1) + ""));
+                dias.add("Fri",today);
+                dias.add("Sat",((calendar.get(Calendar.DATE) + 1) + ""));
+                dias.add("Sun",((calendar.get(Calendar.DATE) + 2) + ""));
+                break;
+
+            case "Sat":
+                dias.add("Mon",((calendar.get(Calendar.DATE) -5) + ""));
+                dias.add("Tue",((calendar.get(Calendar.DATE) -4) + ""));
+                dias.add("Wed",((calendar.get(Calendar.DATE) -3) + ""));
+                dias.add("Thu",((calendar.get(Calendar.DATE) -2) + ""));
+                dias.add("Fri",((calendar.get(Calendar.DATE) -1) + ""));
+                dias.add("Sat",today);
+                dias.add("Sun",((calendar.get(Calendar.DATE) + 1) + ""));
+                break;
+
+            case "Sun":
+                dias.add("Mon",((calendar.get(Calendar.DATE) -6) + ""));
+                dias.add("Tue",((calendar.get(Calendar.DATE) -5) + ""));
+                dias.add("Wed",((calendar.get(Calendar.DATE) -4) + ""));
+                dias.add("Thu",((calendar.get(Calendar.DATE) -3) + ""));
+                dias.add("Fri",((calendar.get(Calendar.DATE) -2) + ""));
+                dias.add("Sat",((calendar.get(Calendar.DATE) -1) + ""));
+                dias.add("Sun",today);
+                break;
+
+            default:
+                Log.e("CALENDAR", "CALENDAR HAS FAILED");
+                break;
+        }
+
+        return dias;
+
+
+    }
+
     public List<String> getCalendarRetults() {
+
         return mCalendarResults;
     }
 
@@ -461,6 +581,7 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
                     .execute();
             List<Event> items = events.getItems();
 
+
             for (Event event : items) {
                 DateTime start = event.getStart().getDateTime();
                 if (start == null) {
@@ -468,9 +589,18 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
                     // the start date.
                     start = event.getStart().getDate();
                 }
+
+                String unformattedTime = String.format("%s", event.getStart());
                 eventStrings.add(
-                        String.format("%s", event.getSummary()));
+                        "{" +
+                                "\"" + "time" + "\"" + ":" + "\"" + unformattedTime.substring(24,29) + "\"" + "," +
+                                "\"" + "eventName" + "\"" + ":" + "\"" + String.format("%s", event.getSummary()) + "\"" + "," +
+                                "\"" + "description" + "\"" + ":" + "\"" + String.format("%s", event.getDescription()) + "\"" + "}");
+
             }
+
+
+
             return eventStrings;
         }
 

@@ -39,12 +39,12 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
-        android:layout_marginBottom="1dp"
         android:layout_below="@+id/rlHeader"
         android:layout_marginLeft="200dp"
-        android:layout_marginRight="200dp"
-        android:id="@+id/weekInfo">
+        android:layout_marginRight="170dp"
+        android:id="@+id/weekInfo"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
             android:id="@+id/pastWeek"
             android:layout_centerVertical="true"
             android:textColor="#2FC5F9"
-            android:textSize="35sp"
+            android:textSize="30sp"
             />
 
         <TextView
@@ -65,7 +65,7 @@
             android:id="@+id/nextWeek"
             android:layout_centerVertical="true"
             android:textColor="#2FC5F9"
-            android:textSize="35sp"
+            android:textSize="30sp"
             />
 
         <TextView
@@ -76,7 +76,7 @@
             android:layout_marginLeft="40dp"
             android:layout_centerVertical="true"
             android:textColor="#2FC5F9"
-            android:textSize="35sp"
+            android:textSize="30sp"
             android:id="@+id/doorStatusText"/>
 
         <ImageButton
@@ -97,14 +97,14 @@
         android:id="@+id/daysOfTheWeek">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:paddingLeft="5dp"
             android:paddingBottom="10dp"
-            android:paddingRight="80dp"
             android:paddingTop="5dp"
-            android:id="@+id/sunday">
+            android:id="@+id/sunday"
+            android:elevation="2dp">
 
             <TextView
                 android:id="@+id/weekDaySunday"
@@ -118,21 +118,22 @@
                 android:text="22"
                 android:textSize="40sp"
                 android:layout_below="@+id/weekDaySunday"
+                android:id="@+id/sunday_day"
                 />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:paddingLeft="5dp"
             android:paddingBottom="10dp"
-            android:paddingRight="80dp"
             android:paddingTop="5dp"
             android:id="@+id/monday"
             android:layout_toRightOf="@id/sunday"
-            android:layout_marginLeft="2dp">
+            android:layout_marginLeft="2dp"
+            android:elevation="2dp">
 
             <TextView
                 android:id="@+id/weekDayMonday"
@@ -146,21 +147,22 @@
                 android:text="23"
                 android:textSize="40sp"
                 android:layout_below="@+id/weekDayMonday"
+                android:id="@+id/monday_day"
                 />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:paddingLeft="5dp"
             android:paddingBottom="10dp"
-            android:paddingRight="80dp"
             android:paddingTop="5dp"
             android:id="@+id/tuesday"
             android:layout_toRightOf="@id/monday"
-            android:layout_marginLeft="2dp">
+            android:layout_marginLeft="2dp"
+            android:elevation="2dp">
 
             <TextView
                 android:id="@+id/weekDayTuesday"
@@ -174,21 +176,22 @@
                 android:text="24"
                 android:textSize="40sp"
                 android:layout_below="@+id/weekDayTuesday"
+                android:id="@+id/tuesday_day"
                 />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:paddingLeft="5dp"
             android:paddingBottom="10dp"
-            android:paddingRight="80dp"
             android:paddingTop="5dp"
             android:id="@+id/wednesday"
             android:layout_toRightOf="@id/tuesday"
-            android:layout_marginLeft="2dp">
+            android:layout_marginLeft="2dp"
+            android:elevation="2dp">
 
             <TextView
                 android:id="@+id/weekDayWednesday"
@@ -202,21 +205,22 @@
                 android:text="25"
                 android:textSize="40sp"
                 android:layout_below="@+id/weekDayWednesday"
+                android:id="@+id/wednesday_day"
                 />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:paddingLeft="5dp"
             android:paddingBottom="10dp"
-            android:paddingRight="80dp"
             android:paddingTop="5dp"
             android:id="@+id/thursday"
             android:layout_toRightOf="@id/wednesday"
-            android:layout_marginLeft="2dp">
+            android:layout_marginLeft="2dp"
+            android:elevation="2dp">
 
             <TextView
                 android:id="@+id/weekDayThursday"
@@ -230,21 +234,22 @@
                 android:text="26"
                 android:textSize="40sp"
                 android:layout_below="@+id/weekDayThursday"
+                android:id="@+id/thursday_day"
                 />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:paddingLeft="5dp"
             android:paddingBottom="10dp"
-            android:paddingRight="80dp"
             android:paddingTop="5dp"
             android:id="@+id/friday"
             android:layout_toRightOf="@id/thursday"
-            android:layout_marginLeft="2dp">
+            android:layout_marginLeft="2dp"
+            android:elevation="2dp">
 
             <TextView
                 android:id="@+id/weekDayFriday"
@@ -258,21 +263,22 @@
                 android:text="27"
                 android:textSize="40sp"
                 android:layout_below="@+id/weekDayFriday"
+                android:id="@+id/friday_day"
                 />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:background="#ffffff"
             android:paddingLeft="5dp"
             android:paddingBottom="10dp"
-            android:paddingRight="80dp"
             android:paddingTop="5dp"
             android:id="@+id/saturday"
             android:layout_toRightOf="@id/friday"
-            android:layout_marginLeft="2dp">
+            android:layout_marginLeft="2dp"
+            android:elevation="2dp">
 
             <TextView
                 android:id="@+id/weekDaySaturday"
@@ -286,6 +292,7 @@
                 android:text="28"
                 android:textSize="40sp"
                 android:layout_below="@+id/weekDaySaturday"
+                android:id="@+id/saturday_day"
                 />
 
         </RelativeLayout>
@@ -294,13 +301,13 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:gravity="center"
+        android:layout_marginLeft="195dp"
         android:layout_below="@+id/daysOfTheWeek"
-        android:paddingLeft="200dp"
-        android:paddingRight="200dp"
         android:paddingTop="10dp">
 
         <android.support.v7.widget.RecyclerView
@@ -309,7 +316,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 
 

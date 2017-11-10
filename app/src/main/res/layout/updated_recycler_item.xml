@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="wrap_content"
+    android:orientation="vertical" android:layout_width="890dp"
     android:layout_height="100dp"
     android:background="#FFFFFF">
 
@@ -17,7 +17,8 @@
             android:layout_height="wrap_content"
             android:text="18:00"
             android:textColor="#FFFFFF"
-            android:layout_centerInParent="true"/>
+            android:layout_centerInParent="true"
+            android:id="@+id/time"/>
 
     </RelativeLayout>
 
@@ -34,6 +35,7 @@
             android:layout_height="wrap_content"
             android:textColor="#5FDDFF"
             android:text="Mercado"
+            android:textStyle="bold"
             android:paddingLeft="20dp"
             android:paddingBottom="1dp"
             android:id="@+id/eventName"/>
@@ -43,7 +45,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/eventName"
             android:text="Comprar coisas para o churrasco"
-            android:paddingLeft="20dp"/>
+            android:paddingLeft="20dp"
+            android:id="@+id/description"/>
 
 
     </RelativeLayout>
@@ -59,13 +62,17 @@
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/eventCheckbox"/>
+            android:id="@+id/eventCheckbox"
+            android:layout_marginRight="20dp"
+            android:scaleX="1.30"
+            android:scaleY="1.30"/>
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/opcaox15"
             android:layout_toRightOf="@id/eventCheckbox"
+            android:layout_marginRight="20dp"
             />
 
 

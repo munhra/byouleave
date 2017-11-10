@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.Image;
 import android.media.Ringtone;
@@ -36,7 +37,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +50,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.api.client.util.ArrayMap;
 
 
 import java.net.HttpURLConnection;
@@ -78,6 +82,22 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private DevicePolicyManager devicePolicyManager;
     private ComponentName componentName = null;
+    TextView placeholderMonday;
+    TextView placeholderTuesday;
+    TextView placeholderWednesday;
+    TextView placeholderThursday;
+    TextView placeholderFriday;
+    TextView placeholderSaturday;
+    TextView placeholderSunday;
+
+    RelativeLayout sunday;
+    RelativeLayout monday;
+    RelativeLayout tuesday;
+    RelativeLayout wednesday;
+    RelativeLayout thursday;
+    RelativeLayout friday;
+    RelativeLayout saturday;
+
 
     private final int PERMISSION_ACCESS_COARSE_LOCATION = 0;
     private CalendarManager calendarManager;
@@ -128,6 +148,13 @@ public class MainActivity extends AppCompatActivity {
                     if(isScreenLocked = true){
                         finishActivity(0); //End Locked Screen Activity
                         ArrayList<String> lista = new ArrayList<String>(calendarManager.getCalendarRetults());
+                        ArrayMap<String, String> week = new ArrayMap<String, String>();
+                        week = calendarManager.getWeekDays();
+                        Log.e("FINAL COUNTDOWN", week.get("today"));
+                        doorAction.setText("Today, " + week.get("month") + " " + week.get("today"));
+
+                        setupWeek(week.get("today"),week);
+
                         ((EventAdapter) meuAdapter).setmData(lista);
                         playNotificationSound();
                         Log.e("Action", "Door has been opened");
@@ -211,6 +238,35 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    public void setupWeek(String today, ArrayMap<String,String> x){
+        Log.e("ANOTHER TEST",x.get("Mon") + "");
+        placeholderMonday.setText(x.get("Mon"));
+        placeholderTuesday.setText(x.get("Tue"));
+        placeholderWednesday.setText(x.get("Wed"));
+        placeholderThursday.setText(x.get("Thu"));
+        placeholderFriday.setText(x.get("Fri"));
+        placeholderSaturday.setText(x.get("Sat"));
+        placeholderSunday.setText(x.get("Sun"));
+
+        switch (x.get("weekday")){
+            case "Mon":
+                monday.setBackgroundColor(Color.parseColor("#5FDDFF")); break;
+            case "Tue":
+                tuesday.setBackgroundColor(Color.parseColor("#5FDDFF")); break;
+            case "Wed":
+                wednesday.setBackgroundColor(Color.parseColor("#5FDDFF")); break;
+            case "Thu":
+                thursday.setBackgroundColor(Color.parseColor("#5FDDFF")); break;
+            case "Fri":
+                friday.setBackgroundColor(Color.parseColor("#5FDDFF")); break;
+            case "Sat":
+                saturday.setBackgroundColor(Color.parseColor("#5FDDFF")); break;
+            case "Sun":
+                sunday.setBackgroundColor(Color.parseColor("#5FDDFF")); break;
+
+        }
+    }
+
     public void restartService(){
         handler.postDelayed(new Runnable() {
             @Override
@@ -235,62 +291,6 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    public void connectionWatcher() {
-        final TextView doorAction = (TextView) findViewById(R.id.doorStatusText);
-        doorAction.setText("Connection Failed with Raspberry");
-
-        final String ipServer = "192.168.42.1";
-        final int portServer = 3000;
-        final Handler handler = new Handler();
-        Timer timer = new Timer();
-        TimerTask doAsynchronousTask = new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try {
-
-                            URL url = new URL("http://"+ipServer+":"+portServer+"/ipDoor");
-                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                            connection.setRequestMethod("GET");
-                            connection.connect();
-
-                            if(connection.getResponseCode() != 200){
-                                Log.e("BroadcastAction","Received Raspberry Connection Failure");
-                                dialog.setTitle("Problems on Raspberry Connection");
-                                builder.create();
-                                if(!dialog.isShowing()){
-                                    dialog.show();
-                                }
-
-                                if(isMyServiceRunning(WifiConnection.class)){
-                                    Log.e("Service is Running", "Ending Service and Running again");
-                                    stopService(new Intent(getBaseContext(), WifiConnection.class));
-                                } else{
-                                    Log.e("Service not Running", "Service is not Running");
-
-                                    final Handler handler = new Handler();
-                                    handler.postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            startService(new Intent(getBaseContext(), WifiConnection.class));
-                                        }
-                                    }, 5000);
-                                }
-
-                            } else{
-                                Log.e("CheckConec","Connected to Raspberry Pi");
-                            }
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                        }
-                    }
-                });
-            }
-        };
-        timer.schedule(doAsynchronousTask, 0, 2000); //execute in every 50000 ms
-    };
-
     public void onDestroy(){
         Log.e("OnDestroy","Broadcast Receiver closed");
         unregisterReceiver(broadcastReceiver);
@@ -312,9 +312,13 @@ public class MainActivity extends AppCompatActivity {
         // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
         // a general rule, you should design your app to hide the status bar whenever you
         // hide the navigation bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
+        int ui_Options = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(ui_Options);
         setContentView(R.layout.updated_activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
@@ -324,25 +328,6 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mRecyclerView.setAdapter(meuAdapter);
-
-        mRecyclerView.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(), mRecyclerView,
-                new RecyclerItemListener.RecyclerTouchListener() {
-                    public void onClickItem(View v, int position) {
-
-                        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-                        alert.setTitle(calendarManager.getCalendarRetults().get(position));
-                        alert.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                //Your action here
-                            }
-                        });
-                        alert.show();
-                    }
-
-                    public void onLongClickItem(View v, int position) {
-
-                    }
-        }));
 
         checkPermitions();
 
@@ -357,11 +342,36 @@ public class MainActivity extends AppCompatActivity {
         });
         dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
-    }
 
-    public interface VolleyCallback{
-        void onSuccess(String result);
-        void onErrorResponse(VolleyError error);
+        placeholderMonday = (TextView)findViewById(R.id.monday_day);
+        placeholderTuesday = (TextView)findViewById(R.id.tuesday_day);
+        placeholderWednesday = (TextView)findViewById(R.id.wednesday_day);
+        placeholderThursday = (TextView)findViewById(R.id.thursday_day);
+        placeholderFriday = (TextView)findViewById(R.id.friday_day);
+        placeholderSaturday = (TextView)findViewById(R.id.saturday_day);
+        placeholderSunday = (TextView)findViewById(R.id.sunday_day);
+
+        sunday = (RelativeLayout) findViewById(R.id.sunday);
+        monday = (RelativeLayout) findViewById(R.id.monday);
+        tuesday = (RelativeLayout) findViewById(R.id.tuesday);
+        wednesday = (RelativeLayout) findViewById(R.id.wednesday);
+        thursday = (RelativeLayout) findViewById(R.id.thursday);
+        friday = (RelativeLayout) findViewById(R.id.friday);
+        saturday = (RelativeLayout) findViewById(R.id.saturday);
+
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(), mRecyclerView,
+                new RecyclerItemListener.RecyclerTouchListener() {
+                    public void onClickItem(View v, int position) {
+
+                        CheckBox mCheckBox;
+                        mCheckBox = (CheckBox)  v.findViewById(R.id.eventCheckbox);
+
+                        mCheckBox.setChecked(!mCheckBox.isChecked());
+                    }
+
+                    public void onLongClickItem(View v, int position) {
+
+                    }}));
     }
 
     public static Context getContext() {
