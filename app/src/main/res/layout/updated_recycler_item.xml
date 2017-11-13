@@ -5,7 +5,7 @@
     android:background="#FFFFFF">
 
     <RelativeLayout
-        android:layout_width="100dp"
+        android:layout_width="125dp"
         android:layout_height="match_parent"
         android:background="#5FDDFF"
         android:gravity="center"

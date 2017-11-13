@@ -83,6 +83,8 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = {CalendarScopes.CALENDAR_READONLY};
     private static final CalendarManager ourInstance = new CalendarManager();
+    private String dayInSeek;
+    private int daysToJump = 7;
 
 
     public static CalendarManager getInstance() {
@@ -221,6 +223,40 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
     public List<String> getCalendarRetults() {
 
         return mCalendarResults;
+    }
+
+    public String getCalculatedDate(String dateFormat, int days) {
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat s = new SimpleDateFormat(dateFormat);
+        cal.add(Calendar.DAY_OF_YEAR, days);
+        try {
+            return s.format(cal.getTime());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            Log.e("TAG", "Error in Parsing Date : " + e.getMessage());
+        }
+        return null;
+    }
+
+    public String getNextWeekEvents() throws IOException, ParseException{
+        //Log.e("Time", "Seeking for events in the next week");
+        daysToJump+=7;
+        //Log.e("Checking",dayInSeek);
+        String nextWeek = getCalculatedDate("yyyy-MM-dd", daysToJump);
+        dayInSeek = nextWeek;
+        //Log.e("Next Week", nextWeek);
+        return nextWeek;
+    }
+
+    public String getPastWeekEvents() throws IOException, ParseException{
+        //Log.e("Time", "Seeking for events in the next week");
+        daysToJump-=7;
+        //Log.e("Checking",dayInSeek);
+        String pastweek = getCalculatedDate("yyyy-MM-dd", daysToJump);
+        dayInSeek = pastweek;
+        //Log.e("Past Week", pastweek);
+
+        return pastweek;
     }
 
     Runnable mStatusChecker = new Runnable() {
@@ -533,16 +569,21 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
          */
 
 
+
+
         private List<String> getDataFromApi() throws IOException, ParseException {
             // List the next 10 events from the primary calendar.
             Log.e("Time", "Getting the time");
             DateTime now = new DateTime(System.currentTimeMillis());
-            //DateTime endOfDay = new DateTime((System.currentTimeMillis() + 1000000) + (System.currentTimeMillis()%86400000));
-
-            /*""", ">>>>>>>>> NOW: " + now);
-            """, ">>>>>>>>> ENTIRE: " + endOfDay);*/
 
             Calendar calendar = Calendar.getInstance();
+
+            if(dayInSeek == null || dayInSeek == ""){
+                Log.e("Defining","Setting Day in Week");
+                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+                String formattedDate = df.format(calendar.getTime());
+                dayInSeek = formattedDate;
+            }
 
             String thisYear = "" + calendar.get(Calendar.YEAR);
             Log.e("Year", "# thisYear : " + thisYear);
@@ -600,6 +641,19 @@ public class CalendarManager extends Activity implements EasyPermissions.Permiss
             }
 
 
+
+            return eventStrings;
+        }
+
+        private List<String> getEventsOnClick(String thisWeek, String nextWeek, String time) throws IOException, ParseException {
+
+            List<String> eventStrings = new ArrayList<String>();
+            Events events = mService.events().list("primary")
+                    .setTimeMin(new DateTime(thisWeek + "T" + time + ":00:00Z"))
+                    .setTimeMax(new DateTime(nextWeek + "T03:00:00Z")) //GMT Brasília -3 ex:"2017-10-07T03:00:00Z"
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .execute();
 
             return eventStrings;
         }

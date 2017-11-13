@@ -53,8 +53,12 @@ import com.android.volley.toolbox.Volley;
 import com.google.api.client.util.ArrayMap;
 
 
+import org.w3c.dom.Text;
+
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -89,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
     TextView placeholderFriday;
     TextView placeholderSaturday;
     TextView placeholderSunday;
-
+    TextView nextWeekButton;
+    TextView previousWeekButton;
     RelativeLayout sunday;
     RelativeLayout monday;
     RelativeLayout tuesday;
@@ -351,6 +356,9 @@ public class MainActivity extends AppCompatActivity {
         placeholderSaturday = (TextView)findViewById(R.id.saturday_day);
         placeholderSunday = (TextView)findViewById(R.id.sunday_day);
 
+        nextWeekButton = (TextView) findViewById(R.id.nextWeek);
+        previousWeekButton = (TextView) findViewById(R.id.pastWeek);
+
         sunday = (RelativeLayout) findViewById(R.id.sunday);
         monday = (RelativeLayout) findViewById(R.id.monday);
         tuesday = (RelativeLayout) findViewById(R.id.tuesday);
@@ -372,6 +380,33 @@ public class MainActivity extends AppCompatActivity {
                     public void onLongClickItem(View v, int position) {
 
                     }}));
+
+        nextWeekButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Log.e("RESULT",calendarManager.getNextWeekEvents());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        previousWeekButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Log.e("RESULT",calendarManager.getPastWeekEvents());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
     public static Context getContext() {
